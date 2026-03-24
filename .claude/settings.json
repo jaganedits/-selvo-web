@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Jagan/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.5/skills/subagent-driven-development/**)",
+      "Bash(mkdir -p lib/firebase lib/services lib/hooks lib/types lib/constants lib/utils)",
+      "Bash(mkdir -p components/ui components/layout components/shared)",
+      "Bash(mkdir -p providers)",
+      "Bash(mkdir -p app/login)",
+      "Bash(mkdir -p \"app/\\(app\\)/dashboard\")",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest init -d -y --base-color neutral --css-variables true)",
+      "Bash(npx shadcn@latest init --defaults)"
+    ]
+  }
+}
