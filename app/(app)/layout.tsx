@@ -16,10 +16,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-background">
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
         <div
-          className="flex flex-col min-h-screen"
+          className="flex flex-col min-h-screen will-change-[margin-left]"
           style={{
             marginLeft: collapsed ? 56 : 240,
-            transition: "margin-left 250ms cubic-bezier(0.4, 0, 0.2, 1)",
+            transition: "margin-left 200ms ease-out",
           }}
         >
           <Header />
