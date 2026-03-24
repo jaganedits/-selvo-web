@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { AuthProvider } from "@/providers/auth-provider";
+import { FirebaseProvider } from "@/providers/firebase-provider";
 import { AuthGuard } from "@/components/shared/auth-guard";
 import { Toaster } from "sonner";
 
@@ -35,9 +36,11 @@ export default function RootLayout({
       <body className="min-h-screen bg-background text-foreground antialiased">
         <ThemeProvider>
           <AuthProvider>
-            <AuthGuard>
-              {children}
-            </AuthGuard>
+            <FirebaseProvider>
+              <AuthGuard>
+                {children}
+              </AuthGuard>
+            </FirebaseProvider>
             <Toaster richColors position="bottom-right" />
           </AuthProvider>
         </ThemeProvider>
