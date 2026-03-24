@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
+import { GlowCard } from "@/components/ui/spotlight-card";
 import {
   Shield,
   PieChart,
@@ -211,20 +212,24 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {FEATURES.map((f) => (
-              <div
+              <GlowCard
                 key={f.title}
-                className="group rounded-2xl border border-border bg-card p-6 transition-all hover:border-orange/30 hover:shadow-lg hover:shadow-orange/5"
+                glowColor="orange"
+                customSize
+                className="!aspect-auto !grid-rows-none !shadow-none bg-card/50 p-6"
               >
-                <div className="h-10 w-10 rounded-xl bg-orange/10 flex items-center justify-center mb-4 group-hover:bg-orange/20 transition-colors">
-                  <f.icon className="h-5 w-5 text-orange" />
+                <div className="relative z-10 flex flex-col">
+                  <div className="h-10 w-10 rounded-xl bg-orange/10 flex items-center justify-center mb-4">
+                    <f.icon className="h-5 w-5 text-orange" />
+                  </div>
+                  <h3 className="font-heading text-lg font-semibold mb-2">
+                    {f.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {f.desc}
+                  </p>
                 </div>
-                <h3 className="font-heading text-lg font-semibold mb-2">
-                  {f.title}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {f.desc}
-                </p>
-              </div>
+              </GlowCard>
             ))}
           </div>
         </div>
