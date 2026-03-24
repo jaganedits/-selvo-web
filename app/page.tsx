@@ -177,10 +177,7 @@ function HeroHeader() {
               <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
                 {user ? (
                   <Link href="/dashboard">
-                    <Button
-                      size="sm"
-                      className="rounded-xl bg-orange hover:bg-orange-light text-white"
-                    >
+                    <Button variant="orange" size="sm">
                       Dashboard
                       <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </Button>
@@ -199,10 +196,7 @@ function HeroHeader() {
                       href="/login"
                       className={cn(scrolled && "lg:hidden")}
                     >
-                      <Button
-                        size="sm"
-                        className="rounded-xl bg-orange hover:bg-orange-light text-white"
-                      >
+                      <Button variant="orange" size="sm">
                         Get Started
                       </Button>
                     </Link>
@@ -212,10 +206,7 @@ function HeroHeader() {
                         scrolled ? "lg:inline-flex" : "hidden"
                       )}
                     >
-                      <Button
-                        size="sm"
-                        className="rounded-xl bg-orange hover:bg-orange-light text-white"
-                      >
+                      <Button variant="orange" size="sm">
                         Get Started
                       </Button>
                     </Link>
@@ -303,10 +294,7 @@ export default function HomePage() {
                 >
                   <div className="rounded-2xl border bg-foreground/10 p-0.5">
                     <Link href="/login">
-                      <Button
-                        size="xl"
-                        className="bg-orange hover:bg-orange-light text-white active:scale-[0.98] transition-all"
-                      >
+                      <Button variant="orange" size="xl">
                         Start Tracking
                         <ArrowRight className="ml-1.5 h-4 w-4" />
                       </Button>

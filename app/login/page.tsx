@@ -245,7 +245,9 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 rounded-xl bg-orange hover:bg-orange-light text-white font-semibold transition-all active:scale-[0.98]"
+                className="w-full"
+                variant="orange"
+                size="xl"
               >
                 {loading ? "Sending..." : "Send Reset Link"}
               </Button>
@@ -505,7 +507,9 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 rounded-xl bg-orange hover:bg-orange-light text-white font-semibold transition-all active:scale-[0.98]"
+                className="w-full"
+                variant="orange"
+                size="xl"
               >
                 {loading
                   ? mode === "signin"
