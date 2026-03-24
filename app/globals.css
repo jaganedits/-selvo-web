@@ -153,10 +153,58 @@
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading), sans-serif;
   }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0.5 0 0 / 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0 0 / 0.5);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0 0 / 0.2);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.7 0 0 / 0.35);
+}
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.5 0 0 / 0.3) transparent;
+}
+
+/* Selection color */
+::selection {
+  background-color: rgba(207, 69, 0, 0.2);
+  color: inherit;
+}
+
+/* Focus-visible global */
+:focus-visible {
+  outline: 2px solid rgba(207, 69, 0, 0.4);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for theme switch */
+html.transitioning,
+html.transitioning *,
+html.transitioning *::before,
+html.transitioning *::after {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease !important;
 }
 
 .noise-overlay {

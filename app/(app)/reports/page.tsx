@@ -180,9 +180,9 @@ export default function ReportsPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold tracking-tight">Reports</h1>
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-lg font-heading font-semibold">Reports</h1>
+        <div className="flex items-center gap-2">
           {/* Month nav */}
           <div className="flex items-center gap-1">
             <Button
@@ -212,19 +212,19 @@ export default function ReportsPage() {
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as number)}
       >
-        <div className="flex items-center justify-between gap-3">
-          <TabsList>
+        <div className="flex items-center justify-between gap-2">
+          <TabsList className="w-fit">
             <TabsTrigger value={0}>Expense</TabsTrigger>
             <TabsTrigger value={1}>Income</TabsTrigger>
           </TabsList>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={exportToExcel}>
+          <div className="flex items-center gap-1.5">
+            <Button variant="ghost" size="sm" onClick={exportToExcel}>
               <Download className="size-3.5" />
-              Export Excel
+              Excel
             </Button>
-            <Button variant="outline" size="sm" onClick={exportToCSV}>
+            <Button variant="ghost" size="sm" onClick={exportToCSV}>
               <Download className="size-3.5" />
-              Export CSV
+              CSV
             </Button>
           </div>
         </div>
@@ -280,13 +280,13 @@ function ReportContent({
   return (
     <div className="space-y-4 mt-3">
       {/* Pie chart + legend */}
-      <div className="rounded-xl border border-border bg-card p-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+      <div className="rounded-xl border border-border/60 bg-card p-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">
           {type === "expense" ? "Expense" : "Income"} Breakdown
         </h2>
         {categoryBreakdown.length > 0 ? (
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="w-[220px] h-[220px] shrink-0">
+            <div className="w-55 h-55 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -347,14 +347,15 @@ function ReportContent({
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-[220px] text-xs text-muted-foreground">
+          <div className="flex items-center justify-center h-55 text-xs text-muted-foreground">
             No {type} transactions this month
           </div>
+
         )}
       </div>
 
       {/* Insights row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
         <InsightCard
           icon={<Calculator className="size-4" />}
           label="Total Amount"
@@ -400,14 +401,14 @@ function InsightCard({
   color: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+    <div className="rounded-xl border border-border/60 bg-card p-3">
+      <div className="flex items-center gap-1.5 mb-1.5 text-muted-foreground/60">
         {icon}
-        <span className="text-[11px] font-medium uppercase tracking-wider">
+        <span className="text-[11px] font-semibold uppercase tracking-wider">
           {label}
         </span>
       </div>
-      <p className={`text-lg font-bold font-heading tabular-nums truncate ${color}`}>
+      <p className={`text-base font-semibold font-heading tabular-nums truncate ${color}`}>
         {value}
       </p>
     </div>

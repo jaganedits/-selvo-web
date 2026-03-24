@@ -203,7 +203,7 @@ export default function BudgetPage() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold tracking-tight">Budget</h1>
+        <h1 className="text-lg font-heading font-semibold">Budget</h1>
         <div className="flex items-center gap-3">
           {/* Month nav */}
           <div className="flex items-center gap-1">
@@ -234,9 +234,9 @@ export default function BudgetPage() {
 
       {/* Budget grid */}
       {budgets.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <CircleDot className="size-10 mb-3 opacity-30" />
-          <p className="text-sm">No budgets set for {formatMonthYear(currentDate)}</p>
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <CircleDot className="size-8 mb-3 opacity-30" />
+          <p className="text-[13px]">No budgets set for {formatMonthYear(currentDate)}</p>
           <p className="text-[11px] mt-1">Click &quot;Add Budget&quot; to get started</p>
         </div>
       ) : (
@@ -253,7 +253,7 @@ export default function BudgetPage() {
             return (
               <div
                 key={b.id}
-                className="rounded-xl border border-border bg-card p-4 group relative"
+                className="rounded-xl border border-border/60 bg-card p-4 group relative"
               >
                 {/* Action buttons */}
                 <div className="absolute top-2 right-2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -291,7 +291,7 @@ export default function BudgetPage() {
 
                 {/* Amounts */}
                 <div className="flex items-baseline justify-between mb-2">
-                  <span className="text-[13px] font-semibold tabular-nums">
+                  <span className="text-[13px] tabular-nums font-medium">
                     {formatCurrency(spent)}
                   </span>
                   <span className="text-[11px] text-muted-foreground tabular-nums">
@@ -329,7 +329,7 @@ export default function BudgetPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingBudget ? "Edit Budget" : "Add Budget"}</DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">{editingBudget ? "Edit Budget" : "Add Budget"}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -438,7 +438,7 @@ export default function BudgetPage() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Delete Budget</DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">Delete Budget</DialogTitle>
           </DialogHeader>
           <p className="text-[13px] text-muted-foreground">
             Are you sure you want to delete the budget for &quot;{deletingBudget?.category}&quot;?

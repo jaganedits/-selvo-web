@@ -155,7 +155,7 @@ export default function CategoriesPage() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold tracking-tight">Categories</h1>
+        <h1 className="text-lg font-heading font-semibold">Categories</h1>
         <Button variant="orange" size="default" onClick={openAdd}>
           <Plus className="size-4" />
           Add Category
@@ -168,7 +168,7 @@ export default function CategoriesPage() {
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as number)}
       >
-        <TabsList>
+        <TabsList className="w-fit">
           <TabsTrigger value={0}>Expense</TabsTrigger>
           <TabsTrigger value={1}>Income</TabsTrigger>
         </TabsList>
@@ -194,7 +194,7 @@ export default function CategoriesPage() {
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">
               Add {activeType === "expense" ? "Expense" : "Income"} Category
             </DialogTitle>
           </DialogHeader>
@@ -233,7 +233,7 @@ export default function CategoriesPage() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Delete Category</DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">Delete Category</DialogTitle>
           </DialogHeader>
           <p className="text-[13px] text-muted-foreground">
             Are you sure you want to delete &quot;{deletingCategory?.name}&quot;? Existing
@@ -269,15 +269,15 @@ function CategoryGrid({
 }) {
   if (categories.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <CircleDot className="size-10 mb-3 opacity-30" />
-        <p className="text-sm">No {type} categories</p>
+      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+        <CircleDot className="size-8 mb-3 opacity-30" />
+        <p className="text-[13px]">No {type} categories</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mt-3">
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 mt-3">
       {categories.map((cat) => {
         const Icon = getCategoryIcon(cat.iconCode);
         const color = argbToHex(cat.colorValue);
@@ -286,18 +286,18 @@ function CategoryGrid({
         return (
           <div
             key={cat.id}
-            className="rounded-xl border border-border bg-card p-4 flex flex-col items-center gap-2.5 relative group"
+            className="rounded-xl border border-border/60 bg-card p-3 flex flex-col items-center gap-2 relative group"
           >
             {/* Default badge */}
             {isDefault && (
-              <div className="absolute top-2 right-2">
-                <Lock className="size-3 text-muted-foreground/50" />
+              <div className="absolute top-1.5 right-1.5">
+                <Lock className="size-2.5 text-muted-foreground/50" />
               </div>
             )}
 
             {/* Delete button for custom categories */}
             {!isDefault && (
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                   variant="ghost"
                   size="icon-xs"
@@ -310,14 +310,14 @@ function CategoryGrid({
 
             {/* Icon */}
             <div
-              className="size-10 rounded-xl flex items-center justify-center"
+              className="size-8 rounded-lg flex items-center justify-center"
               style={{ backgroundColor: `${color}20` }}
             >
-              <Icon className="size-5" style={{ color }} />
+              <Icon className="size-4" style={{ color }} />
             </div>
 
             {/* Name */}
-            <p className="text-[13px] font-medium text-center truncate w-full">
+            <p className="text-[12px] font-medium text-center truncate w-full">
               {cat.name}
             </p>
           </div>

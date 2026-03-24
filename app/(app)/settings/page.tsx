@@ -148,11 +148,11 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4 max-w-2xl">
       {/* Header */}
-      <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
+      <h1 className="text-lg font-heading font-semibold">Settings</h1>
 
       {/* Profile section */}
-      <div className="rounded-xl border border-border bg-card p-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+      <div className="rounded-xl border border-border/60 bg-card p-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-3">
           Profile
         </h2>
         <div className="flex items-center gap-4">
@@ -175,8 +175,8 @@ export default function SettingsPage() {
       </div>
 
       {/* Appearance section */}
-      <div className="rounded-xl border border-border bg-card p-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+      <div className="rounded-xl border border-border/60 bg-card p-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-3">
           Appearance
         </h2>
         <div className="flex items-center gap-2">
@@ -184,7 +184,7 @@ export default function SettingsPage() {
             <button
               key={opt.value}
               onClick={() => setTheme(opt.value)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium border transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-colors ${
                 theme === opt.value
                   ? "border-foreground/30 bg-foreground/5 text-foreground"
                   : "border-transparent bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -198,8 +198,8 @@ export default function SettingsPage() {
       </div>
 
       {/* Navigation section */}
-      <div className="rounded-xl border border-border bg-card p-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+      <div className="rounded-xl border border-border/60 bg-card p-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-3">
           Navigation
         </h2>
         <div className="space-y-1">
@@ -218,8 +218,8 @@ export default function SettingsPage() {
       </div>
 
       {/* Data section */}
-      <div className="rounded-xl border border-border bg-card p-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+      <div className="rounded-xl border border-border/60 bg-card p-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-3">
           Data
         </h2>
         <p className="text-[13px] text-muted-foreground mb-3">
@@ -232,8 +232,8 @@ export default function SettingsPage() {
       </div>
 
       {/* Danger zone */}
-      <div className="rounded-xl border border-red-500/30 bg-card p-4">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-red-500 mb-3">
+      <div className="rounded-xl border border-red-500/20 bg-card p-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-red-500/60 mb-3">
           Danger Zone
         </h2>
         <div className="space-y-3">
@@ -297,7 +297,7 @@ export default function SettingsPage() {
       <Dialog open={editNameOpen} onOpenChange={setEditNameOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Display Name</DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">Edit Display Name</DialogTitle>
           </DialogHeader>
           <div className="space-y-1.5">
             <Label className="text-[12px] text-muted-foreground">Name</Label>
@@ -334,7 +334,7 @@ export default function SettingsPage() {
       >
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Disconnect Firebase</DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">Disconnect Firebase</DialogTitle>
           </DialogHeader>
           <p className="text-[13px] text-muted-foreground">
             Are you sure you want to disconnect your Firebase project? You will

@@ -256,7 +256,7 @@ export default function RecurringPage() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold tracking-tight">Recurring</h1>
+        <h1 className="text-lg font-heading font-semibold">Recurring</h1>
         <Button variant="orange" size="default" onClick={openAdd}>
           <Plus className="size-4" />
           Add Recurring
@@ -265,15 +265,15 @@ export default function RecurringPage() {
 
       {/* List */}
       {recurring.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <CircleDot className="size-10 mb-3 opacity-30" />
-          <p className="text-sm">No recurring transactions</p>
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <CircleDot className="size-8 mb-3 opacity-30" />
+          <p className="text-[13px]">No recurring transactions</p>
           <p className="text-[11px] mt-1">Click &quot;Add Recurring&quot; to get started</p>
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
           {/* Table header */}
-          <div className="hidden md:grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto_auto] gap-3 items-center px-4 py-2 border-b bg-muted/30 text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+          <div className="hidden md:grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto_auto] gap-3 items-center px-4 h-8 border-b border-border/30 bg-muted/20 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
             <span className="w-16">Type</span>
             <span>Name</span>
             <span className="w-20">Frequency</span>
@@ -285,7 +285,7 @@ export default function RecurringPage() {
           </div>
 
           {/* Rows */}
-          <div className="divide-y">
+          <div className="divide-y divide-border/30">
             {paginatedRecurring.map((r) => {
               const cat = catMap.get(r.category);
               const Icon = cat ? getCategoryIcon(cat.iconCode) : CircleDot;
@@ -299,13 +299,13 @@ export default function RecurringPage() {
               return (
                 <div
                   key={r.id}
-                  className={`grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_auto_auto_auto_auto_auto_auto] gap-3 items-center px-4 py-2.5 hover:bg-muted/30 transition-colors ${
+                  className={`grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_auto_auto_auto_auto_auto_auto] gap-3 items-center px-4 h-10 hover:bg-muted/40 transition-colors ${
                     !r.isActive ? "opacity-50" : ""
                   }`}
                 >
                   {/* Type badge */}
                   <span
-                    className={`inline-flex items-center justify-center w-16 h-5 rounded-full text-[11px] font-medium ${
+                    className={`inline-flex items-center justify-center w-16 text-[10px] font-medium px-1.5 py-0.5 rounded-md ${
                       isExpense
                         ? "bg-red-500/10 text-red-500"
                         : "bg-emerald-500/10 text-emerald-500"
@@ -333,7 +333,7 @@ export default function RecurringPage() {
                   {/* Mobile: amount + actions */}
                   <div className="flex items-center gap-2 md:hidden">
                     <span
-                      className={`text-[13px] font-semibold tabular-nums ${
+                      className={`text-[13px] tabular-nums font-medium ${
                         isExpense ? "text-red-500" : "text-emerald-500"
                       }`}
                     >
@@ -346,13 +346,13 @@ export default function RecurringPage() {
                   </div>
 
                   {/* Frequency (desktop) */}
-                  <span className="hidden md:inline-flex items-center justify-center w-20 h-5 rounded-full bg-muted text-[11px] font-medium capitalize">
+                  <span className="hidden md:inline-flex items-center justify-center w-20 text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-muted capitalize">
                     {r.frequency}
                   </span>
 
                   {/* Amount (desktop) */}
                   <span
-                    className={`hidden md:block w-24 text-right text-[13px] font-semibold tabular-nums ${
+                    className={`hidden md:block w-24 text-right text-[13px] tabular-nums font-medium ${
                       isExpense ? "text-red-500" : "text-emerald-500"
                     }`}
                   >
@@ -413,7 +413,7 @@ export default function RecurringPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">
               {editingId ? "Edit Recurring" : "Add Recurring"}
             </DialogTitle>
           </DialogHeader>
@@ -605,7 +605,7 @@ export default function RecurringPage() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Delete Recurring</DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">Delete Recurring</DialogTitle>
           </DialogHeader>
           <p className="text-[13px] text-muted-foreground">
             Are you sure you want to delete &quot;{deletingItem?.name}&quot;? This action

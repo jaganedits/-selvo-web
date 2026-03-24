@@ -304,7 +304,7 @@ export default function TransactionsPage() {
       {/* HEADER                                                             */}
       {/* ================================================================== */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold tracking-tight">Transactions</h1>
+        <h1 className="text-lg font-heading font-semibold">Transactions</h1>
         <div className="flex items-center gap-2">
           <Button variant="orange" size="default" onClick={() => openAdd("expense")}>
             <Plus className="size-4" />
@@ -325,8 +325,8 @@ export default function TransactionsPage() {
       {/* ================================================================== */}
       {/* FILTER BAR                                                         */}
       {/* ================================================================== */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative w-64">
+      <div className="flex items-center gap-2">
+        <div className="relative w-56">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
           <Input
             placeholder="Search transactions..."
@@ -335,12 +335,12 @@ export default function TransactionsPage() {
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(0); }}
           />
         </div>
-        <div className="flex items-center gap-1 rounded-lg border border-input p-0.5">
+        <div className="flex items-center gap-0.5 rounded-lg border border-input p-0.5">
           {(["all", "income", "expense"] as const).map((f) => (
             <button
               key={f}
               onClick={() => { setTypeFilter(f); setCurrentPage(0); }}
-              className={`px-3 py-1 rounded-md text-[13px] font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded-md text-[12px] font-medium transition-colors ${
                 typeFilter === f
                   ? f === "income"
                     ? "bg-emerald-500 text-white"
@@ -355,30 +355,36 @@ export default function TransactionsPage() {
           ))}
         </div>
         {dateRange && (
-          <span className="text-[12px] text-muted-foreground ml-auto">
+          <span className="text-[11px] text-muted-foreground ml-auto">
             {dateRange}
           </span>
         )}
       </div>
 
-      <Separator />
-
       {/* ================================================================== */}
       {/* TRANSACTION TABLE                                                  */}
       {/* ================================================================== */}
       {grouped.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <CircleDot className="size-10 mb-3 opacity-30" />
-          <p className="text-sm">No transactions found</p>
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <CircleDot className="size-8 mb-3 opacity-30" />
+          <p className="text-[13px]">No transactions found</p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-5">
           {grouped.map(([month, txs]) => (
             <div key={month}>
-              <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2">
                 {month}
               </h2>
-              <div className="rounded-lg border divide-y">
+              <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+                {/* Column headers */}
+                <div className="hidden sm:flex items-center gap-3 px-3 h-8 border-b border-border/30 bg-muted/20">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 flex-1 min-w-0 pl-11">Name</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-24 text-right shrink-0">Date</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-10 text-center shrink-0 hidden md:block">Mode</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-28 text-right shrink-0">Amount</span>
+                  <span className="w-3.5 shrink-0" />
+                </div>
                 {txs.map((tx) => {
                   const cat = catMap.get(tx.category);
                   const Icon = cat ? getCategoryIcon(cat.iconCode) : CircleDot;
@@ -390,32 +396,32 @@ export default function TransactionsPage() {
                     <button
                       key={tx.id}
                       onClick={() => openEdit(tx)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/50 transition-colors group"
+                      className="w-full flex items-center gap-3 px-3 h-10 text-left hover:bg-muted/40 transition-colors group border-b border-border/30 last:border-b-0"
                     >
                       {/* Icon */}
                       <div
-                        className="size-8 rounded-lg flex items-center justify-center shrink-0"
+                        className="size-7 rounded-lg flex items-center justify-center shrink-0"
                         style={{ backgroundColor: `${color}18` }}
                       >
-                        <Icon className="size-4" style={{ color }} />
+                        <Icon className="size-3.5" style={{ color }} />
                       </div>
 
                       {/* Name & category */}
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-medium truncate">{tx.name}</p>
-                        <p className="text-[11px] text-muted-foreground truncate">
+                        <p className="text-[11px] text-muted-foreground truncate sm:hidden">
                           {tx.category}
                         </p>
                       </div>
 
                       {/* Date */}
-                      <span className="text-[12px] text-muted-foreground w-24 text-right shrink-0 hidden sm:block">
+                      <span className="text-[12px] text-muted-foreground w-24 text-right shrink-0 hidden sm:block tabular-nums">
                         {format(d, "dd MMM yyyy")}
                       </span>
 
                       {/* Payment mode */}
                       {tx.paymentMode ? (
-                        <span className="text-[11px] text-muted-foreground w-10 text-center shrink-0 hidden md:block">
+                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground w-10 text-center shrink-0 hidden md:block">
                           {tx.paymentMode}
                         </span>
                       ) : (
@@ -424,7 +430,7 @@ export default function TransactionsPage() {
 
                       {/* Amount */}
                       <span
-                        className={`text-[13px] font-semibold tabular-nums w-28 text-right shrink-0 ${
+                        className={`text-[13px] tabular-nums font-medium w-28 text-right shrink-0 ${
                           isExpense ? "text-red-500" : "text-emerald-500"
                         }`}
                       >
@@ -457,14 +463,14 @@ export default function TransactionsPage() {
         <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col overflow-y-auto">
           {/* Colored header */}
           <div
-            className={`px-5 pt-5 pb-4 ${
+            className={`px-4 pt-4 pb-3 ${
               formType === "expense"
                 ? "bg-orange/10"
                 : "bg-emerald-500/10"
             }`}
           >
             <SheetHeader className="p-0">
-              <SheetTitle>
+              <SheetTitle className="text-base font-heading font-semibold">
                 {editingTx ? "Edit Transaction" : "Add Transaction"}
               </SheetTitle>
             </SheetHeader>
@@ -492,7 +498,7 @@ export default function TransactionsPage() {
             </div>
           </div>
 
-          <div className="flex-1 px-5 py-4 space-y-5">
+          <div className="flex-1 px-4 py-3 space-y-4">
             {/* Amount */}
             <div className="space-y-1.5">
               <Label className="text-[12px] text-muted-foreground">Amount</Label>
@@ -597,7 +603,7 @@ export default function TransactionsPage() {
           </div>
 
           {/* Footer */}
-          <div className="border-t px-5 py-4 flex items-center gap-2">
+          <div className="border-t px-4 py-3 flex items-center gap-2">
             {editingTx && (
               <Button
                 variant="destructive"
@@ -628,7 +634,7 @@ export default function TransactionsPage() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Delete Transaction</DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">Delete Transaction</DialogTitle>
           </DialogHeader>
           <p className="text-[13px] text-muted-foreground">
             Are you sure you want to delete &quot;{editingTx?.name}&quot;? This action cannot be

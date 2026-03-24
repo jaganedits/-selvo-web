@@ -338,19 +338,19 @@ export default function SplitwisePage() {
   if (!apiKey || !currentUser) {
     return (
       <div className="space-y-4 max-w-2xl">
-        <h1 className="text-xl font-semibold tracking-tight">Splitwise</h1>
+        <h1 className="text-lg font-heading font-semibold">Splitwise</h1>
 
-        <div className="rounded-xl border border-border bg-card p-6">
-          <div className="flex flex-col items-center text-center py-8">
-            <div className="size-14 rounded-2xl bg-muted/60 flex items-center justify-center mb-4">
+        <div className="rounded-xl border border-border/60 bg-card p-6">
+          <div className="flex flex-col items-center text-center py-6">
+            <div className="size-12 rounded-xl bg-muted/60 flex items-center justify-center mb-3">
               <Image
                 src="/assets/splitwise.svg"
                 alt="Splitwise"
-                width={28}
-                height={28}
+                width={24}
+                height={24}
               />
             </div>
-            <h2 className="text-base font-semibold mb-1">
+            <h2 className="text-base font-heading font-semibold mb-1">
               Connect Splitwise
             </h2>
             <p className="text-[13px] text-muted-foreground max-w-sm">
@@ -412,7 +412,7 @@ export default function SplitwisePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold tracking-tight">Splitwise</h1>
+          <h1 className="text-lg font-heading font-semibold">Splitwise</h1>
           <Separator orientation="vertical" className="h-5" />
           <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
             <User className="size-3.5" />
@@ -436,7 +436,7 @@ export default function SplitwisePage() {
         onValueChange={(v) => setActiveTab(v as number)}
       >
         <div className="flex items-center justify-between">
-          <TabsList>
+          <TabsList className="w-fit">
             <TabsTrigger value={0}>
               <Receipt className="size-3.5" />
               Expenses
@@ -498,40 +498,45 @@ export default function SplitwisePage() {
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
             </div>
           ) : parsedExpenses.length === 0 ? (
-            <div className="rounded-xl border border-border bg-card p-6">
-              <div className="flex flex-col items-center text-center py-8">
-                <Receipt className="size-8 text-muted-foreground/40 mb-3" />
-                <p className="text-[13px] text-muted-foreground">
-                  No expenses found
-                </p>
-              </div>
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <Receipt className="size-8 mb-3 opacity-30" />
+              <p className="text-[13px]">No expenses found</p>
             </div>
           ) : (
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+              {/* Column headers */}
+              <div className="hidden sm:flex items-center gap-3 px-4 h-8 border-b border-border/30 bg-muted/20">
+                <span className="w-5 shrink-0" />
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 flex-1 min-w-0">Name</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-20 shrink-0">Category</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-24 text-right shrink-0">Date</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-24 text-right shrink-0">Amount</span>
+              </div>
+
               {/* Select all */}
               {pageSelectableExpenses.length > 0 && (
-                <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-muted/30">
+                <div className="flex items-center gap-3 px-4 h-8 border-b border-border/30 bg-muted/10">
                   <Checkbox
                     checked={pageSelectableExpenses.length > 0 && pageSelectableExpenses.every((e) => selectedIds.has(e.splitwiseId))}
                     onCheckedChange={toggleSelectAll}
                   />
-                  <span className="text-[12px] text-muted-foreground">
+                  <span className="text-[11px] text-muted-foreground">
                     Select all ({pageSelectableExpenses.length})
                   </span>
                 </div>
               )}
 
               {/* Expense list */}
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-border/30">
                 {paginatedExpenses.map((expense) => {
                   const alreadyImported = importedIds.has(expense.splitwiseId);
                   return (
                     <div
                       key={expense.splitwiseId}
-                      className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                      className={`flex items-center gap-3 px-4 h-10 transition-colors ${
                         alreadyImported
                           ? "opacity-50 bg-muted/20"
-                          : "hover:bg-muted/30"
+                          : "hover:bg-muted/40"
                       }`}
                     >
                       <Checkbox
@@ -544,11 +549,11 @@ export default function SplitwisePage() {
                           <p className="text-[13px] font-medium truncate">
                             {expense.name}
                           </p>
-                          <p className="text-[13px] font-semibold tabular-nums shrink-0">
+                          <p className="text-[13px] tabular-nums font-medium shrink-0">
                             {formatCurrency(expense.amount)}
                           </p>
                         </div>
-                        <div className="flex items-center justify-between gap-2 mt-0.5">
+                        <div className="flex items-center justify-between gap-2 mt-0.5 sm:hidden">
                           <span className="text-[11px] text-muted-foreground">
                             {expense.category}
                           </span>
@@ -559,6 +564,15 @@ export default function SplitwisePage() {
                           </span>
                         </div>
                       </div>
+                      {/* Desktop columns */}
+                      <span className="hidden sm:block text-[12px] text-muted-foreground w-20 truncate shrink-0">
+                        {expense.category}
+                      </span>
+                      <span className="hidden sm:block text-[12px] text-muted-foreground w-24 text-right shrink-0 tabular-nums">
+                        {alreadyImported
+                          ? "Imported"
+                          : formatDate(expense.date)}
+                      </span>
                     </div>
                   );
                 })}
@@ -583,17 +597,13 @@ export default function SplitwisePage() {
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
             </div>
           ) : friends.length === 0 ? (
-            <div className="rounded-xl border border-border bg-card p-6">
-              <div className="flex flex-col items-center text-center py-8">
-                <Users className="size-8 text-muted-foreground/40 mb-3" />
-                <p className="text-[13px] text-muted-foreground">
-                  No friends found
-                </p>
-              </div>
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <Users className="size-8 mb-3 opacity-30" />
+              <p className="text-[13px]">No friends found</p>
             </div>
           ) : (
-            <div className="rounded-xl border border-border bg-card overflow-hidden">
-              <div className="divide-y divide-border">
+            <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+              <div className="divide-y divide-border/30">
                 {friends.map((friend) => {
                   const balance = friend.balance?.[0];
                   const amount = balance ? parseFloat(balance.amount) : 0;
@@ -603,7 +613,7 @@ export default function SplitwisePage() {
                   return (
                     <div
                       key={friend.id}
-                      className="flex items-center gap-3 px-4 py-3"
+                      className="flex items-center gap-3 px-4 h-12"
                     >
                       <div className="size-8 rounded-full bg-muted/60 flex items-center justify-center shrink-0">
                         <User className="size-4 text-muted-foreground" />
@@ -626,7 +636,7 @@ export default function SplitwisePage() {
                         ) : (
                           <>
                             <p
-                              className={`text-[13px] font-semibold tabular-nums ${
+                              className={`text-[13px] tabular-nums font-medium ${
                                 isPositive
                                   ? "text-emerald-600 dark:text-emerald-400"
                                   : "text-red-600 dark:text-red-400"
@@ -653,7 +663,7 @@ export default function SplitwisePage() {
       <Dialog open={disconnectOpen} onOpenChange={setDisconnectOpen}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Disconnect Splitwise</DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">Disconnect Splitwise</DialogTitle>
             <DialogDescription>
               This will remove your Splitwise API key. Previously imported
               transactions will not be affected.
