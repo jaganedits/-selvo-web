@@ -7,9 +7,8 @@ import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, ArrowLeftRight, Wallet, PieChart, Receipt,
-  Tag, Repeat, Settings, Plus, LogOut, ChevronRight,
+  Tag, Repeat, Settings, Plus, ChevronRight,
 } from "lucide-react";
-import { signOut } from "@/lib/firebase/auth";
 
 const navGroups = [
   {
@@ -101,25 +100,17 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* User footer */}
+        {/* User footer — compact, sign out is in header dropdown */}
         <div className="border-t border-border/60 px-2 py-2">
-          <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-2">
-            <div className="h-7 w-7 rounded-full bg-orange/10 flex items-center justify-center shrink-0">
-              <span className="text-xs font-bold text-orange">
+          <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5">
+            <div className="h-6 w-6 rounded-full bg-orange/10 flex items-center justify-center shrink-0">
+              <span className="text-[10px] font-bold text-orange">
                 {(user?.displayName || "U").charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium truncate leading-tight">{user?.displayName || "User"}</p>
-              <p className="text-[10px] text-muted-foreground truncate leading-tight">{user?.email}</p>
             </div>
-            <button
-              onClick={() => signOut()}
-              className="h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-muted transition-colors shrink-0"
-              title="Sign out"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-            </button>
           </div>
         </div>
       </div>
