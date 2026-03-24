@@ -50,6 +50,9 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Reset loading when user changes — critical to prevent premature redirect
+    setLoading(true);
+
     const manager = UserFirebaseManager.instance;
 
     async function init() {
