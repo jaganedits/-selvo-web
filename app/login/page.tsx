@@ -6,6 +6,7 @@ import {
   signInWithEmail,
   signInWithGoogle,
   resetPassword,
+  registerWithEmail,
 } from "@/lib/firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import {
   EyeOff,
   Mail,
   Lock,
+  User,
   Wallet,
   TrendingUp,
   PieChart,
@@ -24,6 +26,8 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,15 +35,55 @@ export default function LoginPage() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
 
+  function validateForm(): string | null {
+    if (!email.trim()) return "Please enter your email";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      return "Please enter a valid email address";
+    if (!password) return "Please enter your password";
+    if (password.length < 6)
+      return "Password must be at least 6 characters";
+    if (mode === "signup" && !name.trim())
+      return "Please enter your name";
+    return null;
+  }
+
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
+    const error = validateForm();
+    if (error) {
+      toast.error(error);
+      return;
+    }
     setLoading(true);
     try {
-      await signInWithEmail(email, password);
+      await signInWithEmail(email.trim(), password);
       router.push("/");
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Failed to sign in";
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSignUp(e: React.FormEvent) {
+    e.preventDefault();
+    const error = validateForm();
+    if (error) {
+      toast.error(error);
+      return;
+    }
+    setLoading(true);
+    try {
+      await registerWithEmail(email.trim(), password, name.trim());
+      toast.success("Account created! Please check your email to verify.");
+      setMode("signin");
+      setName("");
+      setPassword("");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to create account";
       toast.error(message);
     } finally {
       setLoading(false);
@@ -241,7 +285,7 @@ export default function LoginPage() {
             }}
           >
             <h1 className="font-heading text-3xl font-bold mt-6">
-              Welcome back
+              {mode === "signin" ? "Welcome back" : "Create account"}
             </h1>
           </div>
 
@@ -254,11 +298,43 @@ export default function LoginPage() {
             }}
           >
             <p className="text-sm text-muted-foreground mt-1 mb-8">
-              Sign in to continue
+              {mode === "signin"
+                ? "Sign in to continue"
+                : "Enter your details to get started"}
             </p>
           </div>
 
-          <form onSubmit={handleSignIn} className="w-full space-y-4">
+          <form
+            onSubmit={mode === "signin" ? handleSignIn : handleSignUp}
+            className="w-full space-y-4"
+          >
+            {/* Name (signup only) */}
+            {mode === "signup" && (
+              <div
+                style={{
+                  animation: "fade-up 0.5s ease-out forwards",
+                  animationDelay: "150ms",
+                  opacity: 0,
+                }}
+              >
+                <Label htmlFor="name" className="sr-only">
+                  Name
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10 h-12 rounded-xl bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-orange/30"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Email */}
             <div
               style={{
@@ -300,11 +376,12 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Password"
+                  placeholder={mode === "signup" ? "Password (min 6 characters)" : "Password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 pr-10 h-12 rounded-xl bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-orange/30"
                   required
+                  minLength={6}
                 />
                 <button
                   type="button"
@@ -320,24 +397,26 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Forgot password */}
-            <div
-              style={{
-                animation: "fade-up 0.5s ease-out forwards",
-                animationDelay: "280ms",
-                opacity: 0,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setShowForgotPassword(true)}
-                className="text-sm text-orange hover:text-orange-light transition text-right w-full mt-1 cursor-pointer"
+            {/* Forgot password (signin only) */}
+            {mode === "signin" && (
+              <div
+                style={{
+                  animation: "fade-up 0.5s ease-out forwards",
+                  animationDelay: "280ms",
+                  opacity: 0,
+                }}
               >
-                Forgot password?
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-orange hover:text-orange-light transition text-right w-full mt-1 cursor-pointer"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
 
-            {/* Sign In button */}
+            {/* Submit button */}
             <div
               style={{
                 animation: "fade-up 0.5s ease-out forwards",
@@ -350,7 +429,13 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full h-12 rounded-xl bg-orange hover:bg-orange-light text-white font-semibold transition-all active:scale-[0.98]"
               >
-                {loading ? "Signing in..." : "Sign In"}
+                {loading
+                  ? mode === "signin"
+                    ? "Signing in..."
+                    : "Creating account..."
+                  : mode === "signin"
+                    ? "Sign In"
+                    : "Create Account"}
               </Button>
             </div>
           </form>
@@ -397,6 +482,49 @@ export default function LoginPage() {
               </svg>
               Continue with Google
             </Button>
+          </div>
+
+          {/* Mode toggle */}
+          <div
+            className="w-full"
+            style={{
+              animation: "fade-up 0.5s ease-out forwards",
+              animationDelay: "500ms",
+              opacity: 0,
+            }}
+          >
+            <p className="text-sm text-center text-muted-foreground mt-6">
+              {mode === "signin" ? (
+                <>
+                  Don&apos;t have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("signup");
+                      setPassword("");
+                    }}
+                    className="text-orange hover:text-orange-light font-medium transition"
+                  >
+                    Sign up
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("signin");
+                      setName("");
+                      setPassword("");
+                    }}
+                    className="text-orange hover:text-orange-light font-medium transition"
+                  >
+                    Sign in
+                  </button>
+                </>
+              )}
+            </p>
           </div>
         </div>
       </div>
