@@ -150,7 +150,7 @@ export default function LoginPage() {
   }
 
   const inputClass = (hasError: boolean) =>
-    `pl-10 h-12 rounded-xl bg-muted/50 border focus-visible:ring-2 transition-colors ${
+    `pl-10 h-11 rounded-xl bg-muted/50 border focus-visible:ring-2 transition-colors ${
       hasError
         ? "border-destructive focus-visible:ring-destructive/30"
         : "border-transparent focus-visible:ring-orange/30"
@@ -206,7 +206,7 @@ export default function LoginPage() {
           <form
             onSubmit={handleResetPassword}
             noValidate
-            className="w-full space-y-4"
+            className="w-full space-y-3"
           >
             <div
               style={{
@@ -245,7 +245,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 rounded-xl bg-orange hover:bg-orange-light text-white font-semibold transition-all active:scale-[0.98]"
+                className="w-full h-11 rounded-xl bg-orange hover:bg-orange-light text-white font-semibold transition-all active:scale-[0.98]"
               >
                 {loading ? "Sending..." : "Send Reset Link"}
               </Button>
@@ -319,8 +319,8 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel — Form */}
-      <div className="relative flex-1 flex flex-col items-center justify-center p-8 lg:p-12 before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-orange before:to-orange-light lg:before:hidden">
-        <div className="w-full max-w-md mx-auto flex flex-col items-center">
+      <div className="relative flex-1 flex flex-col items-center justify-center p-6 lg:p-10 overflow-y-auto before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-orange before:to-orange-light lg:before:hidden">
+        <div className="w-full max-w-sm mx-auto flex flex-col items-center">
           {/* Logo */}
           <div
             style={{
@@ -329,12 +329,12 @@ export default function LoginPage() {
               opacity: 0,
             }}
           >
-            <div className="h-14 w-14 rounded-2xl overflow-hidden animate-pulse-glow">
+            <div className="h-12 w-12 rounded-xl overflow-hidden animate-pulse-glow">
               <Image
                 src="/assets/logo.png"
                 alt="Selvo"
-                width={56}
-                height={56}
+                width={48}
+                height={48}
                 className="h-full w-full object-cover"
                 priority
               />
@@ -349,7 +349,7 @@ export default function LoginPage() {
               opacity: 0,
             }}
           >
-            <h1 className="font-heading text-3xl font-bold mt-6">
+            <h1 className="font-heading text-2xl font-bold mt-3">
               {mode === "signin" ? "Welcome back" : "Create account"}
             </h1>
           </div>
@@ -362,7 +362,7 @@ export default function LoginPage() {
               opacity: 0,
             }}
           >
-            <p className="text-sm text-muted-foreground mt-1 mb-8">
+            <p className="text-sm text-muted-foreground mt-1 mb-5">
               {mode === "signin"
                 ? "Sign in to continue"
                 : "Enter your details to get started"}
@@ -372,7 +372,7 @@ export default function LoginPage() {
           <form
             onSubmit={handleSubmit}
             noValidate
-            className="w-full space-y-4"
+            className="w-full space-y-3"
           >
             {/* Name (signup only) */}
             {mode === "signup" && (
@@ -505,7 +505,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 rounded-xl bg-orange hover:bg-orange-light text-white font-semibold transition-all active:scale-[0.98]"
+                className="w-full h-11 rounded-xl bg-orange hover:bg-orange-light text-white font-semibold transition-all active:scale-[0.98]"
               >
                 {loading
                   ? mode === "signin"
@@ -527,7 +527,7 @@ export default function LoginPage() {
               opacity: 0,
             }}
           >
-            <div className="flex items-center gap-4 my-6">
+            <div className="flex items-center gap-4 my-4">
               <Separator className="flex-1" />
               <span className="text-xs text-muted-foreground">
                 or continue with
@@ -550,7 +550,7 @@ export default function LoginPage() {
               variant="outline"
               disabled={loading}
               onClick={handleGoogleSignIn}
-              className="w-full h-12 rounded-xl"
+              className="w-full h-11 rounded-xl"
             >
               <Image
                 src="/assets/google.svg"
@@ -572,7 +572,7 @@ export default function LoginPage() {
               opacity: 0,
             }}
           >
-            <p className="text-sm text-center text-muted-foreground mt-6">
+            <p className="text-sm text-center text-muted-foreground mt-4">
               {mode === "signin" ? (
                 <>
                   Don&apos;t have an account?{" "}
