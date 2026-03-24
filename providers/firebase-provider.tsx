@@ -13,6 +13,7 @@ import { useAuth } from "@/providers/auth-provider";
 import UserFirebaseManager from "@/lib/firebase/user-firebase";
 import { seedDefaultCategories } from "@/lib/services/firestore";
 import { saveProfileOnLogin } from "@/lib/services/user-profile";
+import { processPendingRecurring } from "@/lib/services/recurring";
 import type { UserFirebaseConfig } from "@/lib/types";
 
 interface FirebaseContextType {
@@ -62,6 +63,14 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
           setUserFirestore(manager.userFirestore);
           setConfig(manager.config);
           setIsConnected(true);
+
+          // Process pending recurring transactions
+          try {
+            const count = await processPendingRecurring(manager.userFirestore!, user!.uid);
+            if (count > 0) {
+              console.log(`Processed ${count} pending recurring transactions`);
+            }
+          } catch { /* non-critical */ }
         }
       } catch {
         // No config saved — user needs to set up
@@ -83,6 +92,14 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
       if (manager.userFirestore) {
         await seedDefaultCategories(manager.userFirestore, user.uid);
       }
+
+      // Process pending recurring transactions
+      try {
+        const count = await processPendingRecurring(manager.userFirestore!, user.uid);
+        if (count > 0) {
+          console.log(`Processed ${count} pending recurring transactions`);
+        }
+      } catch { /* non-critical */ }
 
       setUserFirestore(manager.userFirestore);
       setConfig(manager.config);
