@@ -65,8 +65,8 @@ const GlowCard: React.FC<GlowCardProps> = ({
     const baseStyles: Record<string, string | number> = {
       '--base': base,
       '--spread': spread,
-      '--radius': '14',
-      '--border': '3',
+      '--radius': '16',
+      '--border': '1',
       '--backdrop': 'hsl(0 0% 60% / 0.12)',
       '--backup-border': 'var(--backdrop)',
       '--size': '200',
@@ -85,6 +85,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
       backgroundPosition: '50% 50%',
       backgroundAttachment: 'fixed',
       border: 'var(--border-size) solid var(--backup-border)',
+      borderRadius: 'calc(var(--radius) * 1px)',
       position: 'relative',
       touchAction: 'none',
     };
@@ -165,7 +166,6 @@ const GlowCard: React.FC<GlowCardProps> = ({
         className={`
           ${getSizeClasses()}
           ${!customSize ? 'aspect-[3/4]' : ''}
-          rounded-2xl
           relative
           grid
           grid-rows-[1fr_auto]
