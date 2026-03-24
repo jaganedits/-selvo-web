@@ -23,7 +23,24 @@ import {
   Wallet,
   TrendingUp,
   PieChart,
+  AlertCircle,
 } from "lucide-react";
+
+interface FieldErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p className="flex items-center gap-1.5 text-xs text-destructive mt-1.5 ml-1">
+      <AlertCircle className="h-3 w-3 shrink-0" />
+      {message}
+    </p>
+  );
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,58 +50,59 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [resetError, setResetError] = useState("");
 
-  function validateForm(): string | null {
-    if (!email.trim()) return "Please enter your email";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      return "Please enter a valid email address";
-    if (!password) return "Please enter your password";
-    if (password.length < 6)
-      return "Password must be at least 6 characters";
-    if (mode === "signup" && !name.trim())
-      return "Please enter your name";
-    return null;
+  function validate(): FieldErrors {
+    const errs: FieldErrors = {};
+    if (mode === "signup" && !name.trim()) {
+      errs.name = "Name is required";
+    }
+    if (!email.trim()) {
+      errs.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      errs.email = "Enter a valid email address";
+    }
+    if (!password) {
+      errs.password = "Password is required";
+    } else if (password.length < 6) {
+      errs.password = "Must be at least 6 characters";
+    }
+    return errs;
   }
 
-  async function handleSignIn(e: React.FormEvent) {
-    e.preventDefault();
-    const error = validateForm();
-    if (error) {
-      toast.error(error);
-      return;
-    }
-    setLoading(true);
-    try {
-      await signInWithEmail(email.trim(), password);
-      router.push("/");
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to sign in";
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
+  function clearFieldError(field: keyof FieldErrors) {
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
   }
 
-  async function handleSignUp(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const error = validateForm();
-    if (error) {
-      toast.error(error);
-      return;
-    }
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
     setLoading(true);
     try {
-      await registerWithEmail(email.trim(), password, name.trim());
-      toast.success("Account created! Please check your email to verify.");
-      setMode("signin");
-      setName("");
-      setPassword("");
+      if (mode === "signin") {
+        await signInWithEmail(email.trim(), password);
+        router.push("/");
+      } else {
+        await registerWithEmail(email.trim(), password, name.trim());
+        toast.success("Account created! Check your email to verify.");
+        setMode("signin");
+        setName("");
+        setPassword("");
+      }
     } catch (error: unknown) {
       const message =
-        error instanceof Error ? error.message : "Failed to create account";
+        error instanceof Error ? error.message : "Something went wrong";
       toast.error(message);
     } finally {
       setLoading(false);
@@ -107,9 +125,18 @@ export default function LoginPage() {
 
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
+    setResetError("");
+    if (!resetEmail.trim()) {
+      setResetError("Email is required");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetEmail.trim())) {
+      setResetError("Enter a valid email address");
+      return;
+    }
     setLoading(true);
     try {
-      await resetPassword(resetEmail);
+      await resetPassword(resetEmail.trim());
       toast.success("Reset link sent! Check your inbox.");
       setShowForgotPassword(false);
       setResetEmail("");
@@ -121,6 +148,13 @@ export default function LoginPage() {
       setLoading(false);
     }
   }
+
+  const inputClass = (hasError: boolean) =>
+    `pl-10 h-12 rounded-xl bg-muted/50 border focus-visible:ring-2 transition-colors ${
+      hasError
+        ? "border-destructive focus-visible:ring-destructive/30"
+        : "border-transparent focus-visible:ring-orange/30"
+    }`;
 
   if (showForgotPassword) {
     return (
@@ -169,7 +203,11 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleResetPassword} className="w-full space-y-4">
+          <form
+            onSubmit={handleResetPassword}
+            noValidate
+            className="w-full space-y-4"
+          >
             <div
               style={{
                 animation: "fade-up 0.5s ease-out forwards",
@@ -187,11 +225,14 @@ export default function LoginPage() {
                   type="email"
                   placeholder="you@example.com"
                   value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  className="pl-10 h-12 rounded-xl bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-orange/30"
-                  required
+                  onChange={(e) => {
+                    setResetEmail(e.target.value);
+                    setResetError("");
+                  }}
+                  className={inputClass(!!resetError)}
                 />
               </div>
+              <FieldError message={resetError} />
             </div>
 
             <div
@@ -221,7 +262,10 @@ export default function LoginPage() {
                 type="button"
                 variant="ghost"
                 className="w-full"
-                onClick={() => setShowForgotPassword(false)}
+                onClick={() => {
+                  setShowForgotPassword(false);
+                  setResetError("");
+                }}
               >
                 Back to login
               </Button>
@@ -326,7 +370,8 @@ export default function LoginPage() {
           </div>
 
           <form
-            onSubmit={mode === "signin" ? handleSignIn : handleSignUp}
+            onSubmit={handleSubmit}
+            noValidate
             className="w-full space-y-4"
           >
             {/* Name (signup only) */}
@@ -348,11 +393,14 @@ export default function LoginPage() {
                     type="text"
                     placeholder="Your name"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="pl-10 h-12 rounded-xl bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-orange/30"
-                    required
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      clearFieldError("name");
+                    }}
+                    className={inputClass(!!errors.name)}
                   />
                 </div>
+                <FieldError message={errors.name} />
               </div>
             )}
 
@@ -374,11 +422,14 @@ export default function LoginPage() {
                   type="email"
                   placeholder="you@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-12 rounded-xl bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-orange/30"
-                  required
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    clearFieldError("email");
+                  }}
+                  className={inputClass(!!errors.email)}
                 />
               </div>
+              <FieldError message={errors.email} />
             </div>
 
             {/* Password */}
@@ -397,12 +448,17 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder={mode === "signup" ? "Password (min 6 characters)" : "Password"}
+                  placeholder={
+                    mode === "signup"
+                      ? "Password (min 6 characters)"
+                      : "Password"
+                  }
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 h-12 rounded-xl bg-muted/50 border-0 focus-visible:ring-2 focus-visible:ring-orange/30"
-                  required
-                  minLength={6}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    clearFieldError("password");
+                  }}
+                  className={`${inputClass(!!errors.password)} pr-10`}
                 />
                 <button
                   type="button"
@@ -416,6 +472,7 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
+              <FieldError message={errors.password} />
             </div>
 
             {/* Forgot password (signin only) */}
@@ -524,6 +581,7 @@ export default function LoginPage() {
                     onClick={() => {
                       setMode("signup");
                       setPassword("");
+                      setErrors({});
                     }}
                     className="text-orange hover:text-orange-light font-medium transition"
                   >
@@ -539,6 +597,7 @@ export default function LoginPage() {
                       setMode("signin");
                       setName("");
                       setPassword("");
+                      setErrors({});
                     }}
                     className="text-orange hover:text-orange-light font-medium transition"
                   >
