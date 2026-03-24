@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Image from "next/image";
 
-const PUBLIC_ROUTES = ["/login", "/welcome", "/setup"];
+const PUBLIC_ROUTES = ["/", "/login", "/welcome", "/setup"];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -19,10 +19,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       pathname.startsWith(route)
     );
 
+    const isAuthPage = pathname.startsWith("/login");
+
     if (!user && !isPublicRoute) {
       router.replace("/login");
-    } else if (user && isPublicRoute) {
-      router.replace("/");
+    } else if (user && isAuthPage) {
+      router.replace("/dashboard");
     }
   }, [user, loading, pathname, router]);
 
