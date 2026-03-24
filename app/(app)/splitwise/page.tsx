@@ -505,17 +505,17 @@ export default function SplitwisePage() {
           ) : (
             <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
               {/* Column headers */}
-              <div className="hidden sm:flex items-center gap-3 px-4 h-8 border-b border-border/30 bg-muted/20">
-                <span className="w-5 shrink-0" />
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 flex-1 min-w-0">Name</span>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-20 shrink-0">Category</span>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-24 text-right shrink-0">Date</span>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-24 text-right shrink-0">Amount</span>
+              <div className="hidden sm:grid sm:grid-cols-[24px_1fr_100px_110px_100px] items-center gap-2 px-4 h-8 border-b border-border/30 bg-muted/20">
+                <span />
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">Name</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">Category</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 text-right">Date</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 text-right">Amount</span>
               </div>
 
               {/* Select all */}
               {pageSelectableExpenses.length > 0 && (
-                <div className="flex items-center gap-3 px-4 h-8 border-b border-border/30 bg-muted/10">
+                <div className="flex items-center gap-2 px-4 h-8 border-b border-border/30 bg-muted/10">
                   <Checkbox
                     checked={pageSelectableExpenses.length > 0 && pageSelectableExpenses.every((e) => selectedIds.has(e.splitwiseId))}
                     onCheckedChange={toggleSelectAll}
@@ -533,46 +533,43 @@ export default function SplitwisePage() {
                   return (
                     <div
                       key={expense.splitwiseId}
-                      className={`flex items-center gap-3 px-4 h-10 transition-colors ${
+                      className={`px-4 h-10 transition-colors ${
                         alreadyImported
                           ? "opacity-50 bg-muted/20"
                           : "hover:bg-muted/40"
                       }`}
                     >
-                      <Checkbox
-                        checked={selectedIds.has(expense.splitwiseId)}
-                        onCheckedChange={() => toggleSelect(expense.splitwiseId)}
-                        disabled={alreadyImported}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-[13px] font-medium truncate">
-                            {expense.name}
-                          </p>
-                          <p className="text-[13px] tabular-nums font-medium shrink-0">
-                            {formatCurrency(expense.amount)}
-                          </p>
-                        </div>
-                        <div className="flex items-center justify-between gap-2 mt-0.5 sm:hidden">
-                          <span className="text-[11px] text-muted-foreground">
-                            {expense.category}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground">
-                            {alreadyImported
-                              ? "Already imported"
-                              : formatDate(expense.date)}
-                          </span>
+                      {/* Mobile layout */}
+                      <div className="flex items-center gap-2 h-full sm:hidden">
+                        <Checkbox
+                          checked={selectedIds.has(expense.splitwiseId)}
+                          onCheckedChange={() => toggleSelect(expense.splitwiseId)}
+                          disabled={alreadyImported}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-medium truncate">{expense.name}</p>
+                          <div className="flex items-center justify-between gap-2 mt-0.5">
+                            <span className="text-[11px] text-muted-foreground">{expense.category}</span>
+                            <span className="text-[11px] text-muted-foreground tabular-nums">{formatCurrency(expense.amount)}</span>
+                          </div>
                         </div>
                       </div>
-                      {/* Desktop columns */}
-                      <span className="hidden sm:block text-[12px] text-muted-foreground w-20 truncate shrink-0">
-                        {expense.category}
-                      </span>
-                      <span className="hidden sm:block text-[12px] text-muted-foreground w-24 text-right shrink-0 tabular-nums">
-                        {alreadyImported
-                          ? "Imported"
-                          : formatDate(expense.date)}
-                      </span>
+                      {/* Desktop grid layout — matches header columns exactly */}
+                      <div className="hidden sm:grid sm:grid-cols-[24px_1fr_100px_110px_100px] items-center gap-2 h-full">
+                        <Checkbox
+                          checked={selectedIds.has(expense.splitwiseId)}
+                          onCheckedChange={() => toggleSelect(expense.splitwiseId)}
+                          disabled={alreadyImported}
+                        />
+                        <p className="text-[13px] font-medium truncate">{expense.name}</p>
+                        <span className="text-[12px] text-muted-foreground truncate">{expense.category}</span>
+                        <span className="text-[12px] text-muted-foreground text-right tabular-nums">
+                          {alreadyImported ? "Imported" : formatDate(expense.date)}
+                        </span>
+                        <span className="text-[13px] font-medium text-right tabular-nums text-expense">
+                          {formatCurrency(expense.amount)}
+                        </span>
+                      </div>
                     </div>
                   );
                 })}
