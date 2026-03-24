@@ -5,6 +5,7 @@ import {
 } from "firebase/firestore";
 import type { TransactionFormData, CategoryFormData, RecurringFormData } from "@/lib/types";
 import { ALL_DEFAULT_CATEGORIES } from "@/lib/constants";
+import { mainFirestore } from "@/lib/firebase/config";
 
 // ---- TRANSACTIONS ----
 
@@ -130,4 +131,37 @@ export async function toggleRecurring(fs: Firestore, uid: string, docId: string,
 
 export async function deleteRecurring(fs: Firestore, uid: string, docId: string) {
   return deleteDoc(doc(fs, "users", uid, "recurring", docId));
+}
+
+// ---- SPLITWISE API KEY (operates on main Firebase) ----
+
+export async function saveSplitWiseApiKey(uid: string, apiKey: string) {
+  await setDoc(doc(mainFirestore, "users", uid), { splitwiseApiKey: apiKey }, { merge: true });
+  if (typeof window !== "undefined") {
+    localStorage.setItem("selvo_splitwise_token", apiKey);
+  }
+}
+
+export async function getSplitWiseApiKey(uid: string): Promise<string | null> {
+  if (typeof window !== "undefined") {
+    const cached = localStorage.getItem("selvo_splitwise_token");
+    if (cached) return cached;
+  }
+  try {
+    const snap = await getDoc(doc(mainFirestore, "users", uid));
+    const key = snap.data()?.splitwiseApiKey || null;
+    if (key && typeof window !== "undefined") {
+      localStorage.setItem("selvo_splitwise_token", key);
+    }
+    return key;
+  } catch {
+    return null;
+  }
+}
+
+export async function clearSplitWiseApiKey(uid: string) {
+  await updateDoc(doc(mainFirestore, "users", uid), { splitwiseApiKey: "" });
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("selvo_splitwise_token");
+  }
 }
