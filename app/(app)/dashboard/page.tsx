@@ -4,29 +4,26 @@ import { useMemo } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useCategories } from "@/lib/hooks/use-categories";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, getGreeting, formatDate } from "@/lib/utils/format";
 import { Timestamp } from "firebase/firestore";
 import { MATERIAL_TO_LUCIDE } from "@/lib/constants/icon-map";
-import { ArrowUpRight, ArrowDownRight, Wallet } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Wallet, TrendingUp } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
+import type { ValueType } from "recharts/types/component/DefaultTooltipContent";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
 
 function getCategoryIcon(iconCode: number) {
   const name = MATERIAL_TO_LUCIDE[iconCode];
   if (!name) return LucideIcons.CircleDot;
-  // Convert kebab-case to PascalCase
-  const pascal = name.split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join("");
+  const pascal = name.split("-").map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join("");
   return (LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>>)[pascal] || LucideIcons.CircleDot;
 }
 
 function argbToHex(argb: number): string {
-  const hex = (argb & 0x00FFFFFF).toString(16).padStart(6, "0");
-  return `#${hex}`;
+  return `#${(argb & 0x00FFFFFF).toString(16).padStart(6, "0")}`;
 }
 
 export default function DashboardPage() {
@@ -36,45 +33,36 @@ export default function DashboardPage() {
 
   const stats = useMemo(() => {
     const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+    const cm = now.getMonth();
+    const cy = now.getFullYear();
 
     const monthTx = transactions.filter((t) => {
-      const d = t.date instanceof Timestamp ? t.date.toDate() : new Date(t.date);
-      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      const d = t.date instanceof Timestamp ? t.date.toDate() : new Date(t.date as unknown as string);
+      return d.getMonth() === cm && d.getFullYear() === cy;
     });
 
     const income = monthTx.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
     const expense = monthTx.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-    const balance = income - expense;
 
-    // Category breakdown for pie chart
-    const categoryMap = new Map<string, number>();
+    // Category breakdown
+    const catMap = new Map<string, number>();
     monthTx.filter(t => t.type === "expense").forEach(t => {
-      categoryMap.set(t.category, (categoryMap.get(t.category) || 0) + t.amount);
+      catMap.set(t.category, (catMap.get(t.category) || 0) + t.amount);
     });
-
-    const categoryBreakdown = Array.from(categoryMap.entries())
+    const categoryBreakdown = Array.from(catMap.entries())
       .map(([name, amount]) => {
         const cat = categories.find(c => c.name === name);
-        return {
-          name,
-          amount,
-          color: cat ? argbToHex(cat.colorValue) : "#95A5A6",
-          iconCode: cat?.iconCode || 0,
-        };
+        return { name, amount, color: cat ? argbToHex(cat.colorValue) : "#95A5A6", iconCode: cat?.iconCode || 0 };
       })
       .sort((a, b) => b.amount - a.amount);
 
-    // 6-month trend for bar chart
+    // 6-month trend
     const months: { name: string; income: number; expense: number }[] = [];
     for (let i = 5; i >= 0; i--) {
-      const d = new Date(currentYear, currentMonth - i, 1);
-      const m = d.getMonth();
-      const y = d.getFullYear();
+      const d = new Date(cy, cm - i, 1);
       const mTx = transactions.filter(t => {
-        const td = t.date instanceof Timestamp ? t.date.toDate() : new Date(t.date);
-        return td.getMonth() === m && td.getFullYear() === y;
+        const td = t.date instanceof Timestamp ? t.date.toDate() : new Date(t.date as unknown as string);
+        return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear();
       });
       months.push({
         name: d.toLocaleString("default", { month: "short" }),
@@ -83,20 +71,18 @@ export default function DashboardPage() {
       });
     }
 
-    // Top 8 categories
     const topCategories = categoryBreakdown.slice(0, 8);
     const maxCatAmount = topCategories[0]?.amount || 1;
 
-    // Recent 5 transactions
     const recent = [...transactions]
       .sort((a, b) => {
-        const da = a.date instanceof Timestamp ? a.date.toDate() : new Date(a.date);
-        const db = b.date instanceof Timestamp ? b.date.toDate() : new Date(b.date);
+        const da = a.date instanceof Timestamp ? a.date.toDate() : new Date(a.date as unknown as string);
+        const db = b.date instanceof Timestamp ? b.date.toDate() : new Date(b.date as unknown as string);
         return db.getTime() - da.getTime();
       })
-      .slice(0, 5);
+      .slice(0, 7);
 
-    return { income, expense, balance, categoryBreakdown, months, topCategories, maxCatAmount, recent };
+    return { income, expense, balance: income - expense, categoryBreakdown, months, topCategories, maxCatAmount, recent };
   }, [transactions, categories]);
 
   if (txLoading) {
@@ -108,206 +94,226 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl">
-      {/* Greeting */}
-      <div>
-        <h1 className="font-heading text-2xl md:text-3xl font-bold">
-          {getGreeting()},{" "}
-          <span className="text-orange">{user?.displayName || "User"}</span>
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">Here&apos;s your financial overview</p>
+    <div className="space-y-5">
+      {/* Row 1: Greeting + Stat Chips */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="font-heading text-xl font-bold tracking-tight">
+            {getGreeting()},{" "}
+            <span className="text-orange">{user?.displayName || "User"}</span>
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Financial overview for this month</p>
+        </div>
+
+        {/* Stat chips — inline on desktop */}
+        <div className="flex items-center gap-2">
+          <StatChip
+            label="Income"
+            value={formatCurrency(stats.income)}
+            icon={<ArrowUpRight className="h-3.5 w-3.5" />}
+            color="text-income"
+            bg="bg-income/10"
+          />
+          <StatChip
+            label="Expense"
+            value={formatCurrency(stats.expense)}
+            icon={<ArrowDownRight className="h-3.5 w-3.5" />}
+            color="text-expense"
+            bg="bg-expense/10"
+          />
+          <StatChip
+            label="Balance"
+            value={formatCurrency(stats.balance)}
+            icon={<Wallet className="h-3.5 w-3.5" />}
+            color={stats.balance >= 0 ? "text-income" : "text-expense"}
+            bg="bg-budget/10"
+          />
+        </div>
       </div>
 
-      {/* Balance Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Income</p>
-                <p className="text-2xl font-bold font-heading text-income mt-1">{formatCurrency(stats.income)}</p>
-              </div>
-              <div className="h-10 w-10 rounded-xl bg-income/10 flex items-center justify-center">
-                <ArrowUpRight className="h-5 w-5 text-income" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Expense</p>
-                <p className="text-2xl font-bold font-heading text-expense mt-1">{formatCurrency(stats.expense)}</p>
-              </div>
-              <div className="h-10 w-10 rounded-xl bg-expense/10 flex items-center justify-center">
-                <ArrowDownRight className="h-5 w-5 text-expense" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Balance</p>
-                <p className={`text-2xl font-bold font-heading mt-1 ${stats.balance >= 0 ? "text-income" : "text-expense"}`}>
-                  {formatCurrency(stats.balance)}
-                </p>
-              </div>
-              <div className="h-10 w-10 rounded-xl bg-budget/10 flex items-center justify-center">
-                <Wallet className="h-5 w-5 text-budget" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Pie Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-lg">Expense Breakdown</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {stats.categoryBreakdown.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={stats.categoryBreakdown}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="amount"
-                    nameKey="name"
-                  >
-                    {stats.categoryBreakdown.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value?: ValueType) => formatCurrency(Number(value ?? 0))}
-                    contentStyle={{ borderRadius: "12px", border: "1px solid var(--border)", background: "var(--card)" }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[250px] text-sm text-muted-foreground">
-                No expenses this month
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Bar Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-lg">6-Month Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={stats.months}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `₹${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
-                <Tooltip
-                  formatter={(value?: ValueType) => formatCurrency(Number(value ?? 0))}
-                  contentStyle={{ borderRadius: "12px", border: "1px solid var(--border)", background: "var(--card)" }}
-                />
-                <Legend />
-                <Bar dataKey="income" name="Income" fill="#2ECC71" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="expense" name="Expense" fill="#CF4500" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Categories */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-lg">Top Categories</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {stats.topCategories.length > 0 ? (
-              stats.topCategories.map((cat) => {
-                const Icon = getCategoryIcon(cat.iconCode);
-                const pct = Math.round((cat.amount / stats.expense) * 100);
-                return (
-                  <div key={cat.name} className="flex items-center gap-3">
-                    <div
-                      className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${cat.color}20` }}
+      {/* Row 2: Charts — full width, side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {/* Pie — 2 cols */}
+        <div className="lg:col-span-2 rounded-xl border border-border bg-card p-4">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Expense Breakdown</h2>
+          {stats.categoryBreakdown.length > 0 ? (
+            <div className="flex items-center gap-4">
+              <div className="w-[180px] h-[180px] shrink-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={stats.categoryBreakdown}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      paddingAngle={2}
+                      dataKey="amount"
+                      stroke="none"
                     >
-                      <Icon className="h-4 w-4" style={{ color: cat.color }} />
+                      {stats.categoryBreakdown.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value?: ValueType) => formatCurrency(Number(value ?? 0))}
+                      contentStyle={{ borderRadius: "8px", border: "1px solid var(--border)", background: "var(--card)", fontSize: "12px" }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Legend */}
+              <div className="flex-1 space-y-1.5 overflow-hidden">
+                {stats.categoryBreakdown.slice(0, 6).map((cat) => (
+                  <div key={cat.name} className="flex items-center gap-2 text-xs">
+                    <div className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ backgroundColor: cat.color }} />
+                    <span className="truncate text-muted-foreground">{cat.name}</span>
+                    <span className="ml-auto font-medium tabular-nums">{formatCurrency(cat.amount)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-[180px] text-xs text-muted-foreground">No expenses this month</div>
+          )}
+        </div>
+
+        {/* Bar — 3 cols */}
+        <div className="lg:col-span-3 rounded-xl border border-border bg-card p-4">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">6-Month Trend</h2>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={stats.months} barGap={2}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis
+                tick={{ fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                width={45}
+                tickFormatter={(v) => v >= 1000 ? `₹${(v / 1000).toFixed(0)}k` : `₹${v}`}
+              />
+              <Tooltip
+                formatter={(value?: ValueType) => formatCurrency(Number(value ?? 0))}
+                contentStyle={{ borderRadius: "8px", border: "1px solid var(--border)", background: "var(--card)", fontSize: "12px" }}
+              />
+              <Bar dataKey="income" name="Income" fill="#2ECC71" radius={[3, 3, 0, 0]} maxBarSize={32} />
+              <Bar dataKey="expense" name="Expense" fill="#CF4500" radius={[3, 3, 0, 0]} maxBarSize={32} />
+            </BarChart>
+          </ResponsiveContainer>
+          <div className="flex items-center justify-center gap-4 mt-2">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="h-2.5 w-2.5 rounded-sm bg-income" /> Income
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="h-2.5 w-2.5 rounded-sm bg-expense" /> Expense
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Row 3: Categories + Transactions — side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Top Categories */}
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Top Categories</h2>
+            <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
+          {stats.topCategories.length > 0 ? (
+            <div className="space-y-2.5">
+              {stats.topCategories.map((cat) => {
+                const Icon = getCategoryIcon(cat.iconCode);
+                const pct = stats.expense > 0 ? Math.round((cat.amount / stats.expense) * 100) : 0;
+                return (
+                  <div key={cat.name} className="flex items-center gap-2.5">
+                    <div
+                      className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: `${cat.color}18` }}
+                    >
+                      <Icon className="h-3.5 w-3.5" style={{ color: cat.color }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium truncate">{cat.name}</span>
-                        <span className="text-xs text-muted-foreground ml-2">{pct}%</span>
+                      <div className="flex items-center justify-between text-xs mb-0.5">
+                        <span className="font-medium truncate">{cat.name}</span>
+                        <span className="text-muted-foreground tabular-nums ml-2">{pct}%</span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div className="h-1 rounded-full bg-muted overflow-hidden">
                         <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{
-                            width: `${(cat.amount / stats.maxCatAmount) * 100}%`,
-                            backgroundColor: cat.color,
-                          }}
+                          className="h-full rounded-full"
+                          style={{ width: `${(cat.amount / stats.maxCatAmount) * 100}%`, backgroundColor: cat.color }}
                         />
                       </div>
                     </div>
-                    <span className="text-sm font-medium shrink-0">{formatCurrency(cat.amount)}</span>
+                    <span className="text-xs font-semibold tabular-nums shrink-0 w-20 text-right">{formatCurrency(cat.amount)}</span>
                   </div>
                 );
-              })
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">No expenses this month</p>
-            )}
-          </CardContent>
-        </Card>
+              })}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-8">No expenses this month</p>
+          )}
+        </div>
 
         {/* Recent Transactions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-lg">Recent Transactions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {stats.recent.length > 0 ? (
-              stats.recent.map((tx) => {
+        <div className="rounded-xl border border-border bg-card p-4">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Recent Transactions</h2>
+          {stats.recent.length > 0 ? (
+            <div className="space-y-1">
+              {stats.recent.map((tx) => {
                 const cat = categories.find(c => c.name === tx.category);
                 const Icon = cat ? getCategoryIcon(cat.iconCode) : LucideIcons.CircleDot;
                 const color = cat ? argbToHex(cat.colorValue) : "#95A5A6";
                 const isIncome = tx.type === "income";
                 return (
-                  <div key={tx.id} className="flex items-center gap-3">
+                  <div
+                    key={tx.id}
+                    className="flex items-center gap-2.5 rounded-lg px-2 py-2 hover:bg-muted/50 transition-colors -mx-2"
+                  >
                     <div
-                      className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${color}20` }}
+                      className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: `${color}18` }}
                     >
-                      <Icon className="h-4 w-4" style={{ color }} />
+                      <Icon className="h-3.5 w-3.5" style={{ color }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{tx.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm font-medium truncate leading-tight">{tx.name}</p>
+                      <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
                         {tx.category} · {formatDate(tx.date)}
                       </p>
                     </div>
-                    <span className={`text-sm font-semibold shrink-0 ${isIncome ? "text-income" : "text-expense"}`}>
+                    <span className={`text-sm font-semibold tabular-nums shrink-0 ${isIncome ? "text-income" : "text-expense"}`}>
                       {isIncome ? "+" : "-"}{formatCurrency(tx.amount)}
                     </span>
                   </div>
                 );
-              })
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">No transactions yet</p>
-            )}
-          </CardContent>
-        </Card>
+              })}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-8">No transactions yet</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatChip({
+  label, value, icon, color, bg,
+}: {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  color: string;
+  bg: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-3.5 py-2">
+      <div className={`h-7 w-7 rounded-lg ${bg} flex items-center justify-center ${color}`}>
+        {icon}
+      </div>
+      <div>
+        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider leading-none">{label}</p>
+        <p className={`text-sm font-bold font-heading tabular-nums leading-tight mt-0.5 ${color}`}>{value}</p>
       </div>
     </div>
   );
