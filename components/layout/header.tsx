@@ -81,11 +81,26 @@ export function Header() {
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-muted/60 transition-colors"
+            className="relative h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-muted/60"
+            style={{ transition: "background-color 150ms, color 150ms" }}
             title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           >
-            <Sun className="h-3.5 w-3.5 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-3.5 w-3.5 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+            <Sun
+              className="h-3.5 w-3.5 absolute"
+              style={{
+                transform: theme === "dark" ? "rotate(-90deg) scale(0)" : "rotate(0deg) scale(1)",
+                opacity: theme === "dark" ? 0 : 1,
+                transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms",
+              }}
+            />
+            <Moon
+              className="h-3.5 w-3.5 absolute"
+              style={{
+                transform: theme === "dark" ? "rotate(0deg) scale(1)" : "rotate(90deg) scale(0)",
+                opacity: theme === "dark" ? 1 : 0,
+                transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms",
+              }}
+            />
           </button>
 
           {/* User dropdown */}

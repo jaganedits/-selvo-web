@@ -7,7 +7,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, ArrowLeftRight, Wallet, PieChart, Receipt,
-  Tag, Repeat, Settings, Plus, ChevronRight, PanelLeftClose, PanelLeft,
+  Tag, Repeat, Settings, Plus, ChevronsLeft, ChevronsRight,
 } from "lucide-react";
 
 const navGroups = [
@@ -47,97 +47,122 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   return (
     <aside
-      className="hidden md:flex md:flex-col md:fixed md:inset-y-0 z-40 transition-[width] duration-300 ease-in-out overflow-hidden"
-      style={{ width: collapsed ? 60 : 240 }}
+      className="hidden md:flex md:flex-col md:fixed md:inset-y-0 z-40"
+      style={{
+        width: collapsed ? 56 : 240,
+        transition: "width 250ms cubic-bezier(0.4, 0, 0.2, 1)",
+      }}
     >
-      <div className="flex flex-col flex-1 bg-card/50 border-r border-border/60 min-w-0">
-        {/* Logo + Collapse toggle */}
-        <div className="flex items-center justify-between px-3 pt-3 pb-1 whitespace-nowrap">
-          <Link href="/dashboard" className="flex items-center gap-2 overflow-hidden">
+      <div className="flex flex-col flex-1 bg-card border-r border-border/60 overflow-hidden">
+        {/* Logo */}
+        <div className="flex items-center h-11 px-3 shrink-0">
+          <Link href="/dashboard" className="flex items-center gap-2.5 overflow-hidden">
             <div className="h-7 w-7 rounded-md overflow-hidden shrink-0">
               <Image src="/assets/logo.png" alt="Selvo" width={28} height={28} className="h-full w-full object-cover" />
             </div>
-            <span className={cn(
-              "font-heading text-base font-bold tracking-tight transition-opacity duration-200",
-              collapsed ? "opacity-0 w-0" : "opacity-100"
-            )}>Selvo</span>
+            <span
+              className="font-heading text-base font-bold tracking-tight whitespace-nowrap"
+              style={{
+                opacity: collapsed ? 0 : 1,
+                transition: "opacity 200ms",
+              }}
+            >
+              Selvo
+            </span>
           </Link>
-          <button
-            onClick={onToggle}
-            className="h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted/60 transition-colors shrink-0"
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {collapsed ? (
-              <PanelLeft className="h-3.5 w-3.5" />
-            ) : (
-              <PanelLeftClose className="h-3.5 w-3.5" />
-            )}
-          </button>
         </div>
 
         {/* Add Transaction */}
-        <div className="px-2 pt-3 pb-1">
+        <div className="px-2 pb-1">
           <Link
             href="/transactions?add=expense"
-            className="flex items-center gap-2 rounded-lg bg-orange text-white transition-all duration-200 hover:bg-orange-light active:scale-[0.98] px-2.5 py-2 whitespace-nowrap overflow-hidden"
             title="New Transaction"
+            className="flex items-center gap-2 rounded-lg bg-orange text-white hover:bg-orange-light active:scale-[0.98] h-9 px-2.5 overflow-hidden whitespace-nowrap"
+            style={{ transition: "background-color 150ms, transform 100ms" }}
           >
             <Plus className="h-4 w-4 shrink-0" />
-            <span className={cn(
-              "text-xs font-semibold transition-opacity duration-200",
-              collapsed ? "opacity-0 w-0" : "opacity-100"
-            )}>New Transaction</span>
+            <span
+              className="text-xs font-semibold whitespace-nowrap"
+              style={{
+                opacity: collapsed ? 0 : 1,
+                width: collapsed ? 0 : "auto",
+                transition: "opacity 200ms",
+              }}
+            >
+              New Transaction
+            </span>
           </Link>
         </div>
 
-        {/* Navigation groups */}
-        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 pt-2 pb-2">
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 pt-1 pb-2">
           {navGroups.map((group, gi) => (
-            <div key={group.label} className="mb-1">
-              <div className={cn(
-                "overflow-hidden transition-all duration-200",
-                collapsed ? "h-0 opacity-0" : "h-6 opacity-100"
-              )}>
-                <p className="px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 whitespace-nowrap">
+            <div key={group.label}>
+              {/* Group label — expanded only */}
+              <div
+                className="overflow-hidden whitespace-nowrap"
+                style={{
+                  height: collapsed ? 0 : 24,
+                  opacity: collapsed ? 0 : 1,
+                  transition: "height 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms",
+                }}
+              >
+                <p className="px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60">
                   {group.label}
                 </p>
               </div>
+
+              {/* Divider — collapsed only */}
               {gi > 0 && (
-                <div className={cn(
-                  "mx-2 h-px bg-border/40 transition-all duration-200",
-                  collapsed ? "my-1.5 opacity-100" : "my-0 opacity-0 h-0"
-                )} />
+                <div
+                  className="mx-2.5 bg-border/40"
+                  style={{
+                    height: collapsed ? 1 : 0,
+                    marginTop: collapsed ? 6 : 0,
+                    marginBottom: collapsed ? 6 : 0,
+                    opacity: collapsed ? 1 : 0,
+                    transition: "all 250ms cubic-bezier(0.4, 0, 0.2, 1)",
+                  }}
+                />
               )}
+
               {group.items.map((item) => {
-                const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-                const exactDashboard = item.href === "/dashboard" && pathname === "/dashboard";
-                const active = isActive || exactDashboard;
+                const active =
+                  pathname === item.href ||
+                  (item.href !== "/dashboard" && pathname.startsWith(item.href)) ||
+                  (item.href === "/dashboard" && pathname === "/dashboard");
+
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
                     title={item.name}
                     className={cn(
-                      "group flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13px] font-medium transition-all duration-200 relative whitespace-nowrap overflow-hidden",
+                      "group relative flex items-center gap-2.5 rounded-lg h-8 px-2.5 text-[13px] font-medium overflow-hidden whitespace-nowrap my-0.5",
                       active
                         ? "text-orange bg-orange/[0.08]"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                     )}
+                    style={{ transition: "background-color 150ms, color 150ms" }}
                   >
                     {active && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full bg-orange transition-all duration-200" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3.5 rounded-r-full bg-orange" />
                     )}
-                    <item.icon className={cn(
-                      "h-4 w-4 shrink-0",
-                      active ? "text-orange" : "text-muted-foreground/70 group-hover:text-foreground"
-                    )} />
-                    <span className={cn(
-                      "truncate transition-opacity duration-200",
-                      collapsed ? "opacity-0" : "opacity-100"
-                    )}>{item.name}</span>
-                    {active && !collapsed && (
-                      <ChevronRight className="ml-auto h-3 w-3 text-orange/50 shrink-0" />
-                    )}
+                    <item.icon
+                      className={cn(
+                        "h-4 w-4 shrink-0",
+                        active ? "text-orange" : "text-muted-foreground/70 group-hover:text-foreground"
+                      )}
+                      style={{ transition: "color 150ms" }}
+                    />
+                    <span
+                      style={{
+                        opacity: collapsed ? 0 : 1,
+                        transition: "opacity 200ms",
+                      }}
+                    >
+                      {item.name}
+                    </span>
                   </Link>
                 );
               })}
@@ -145,18 +170,47 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           ))}
         </nav>
 
-        {/* User footer */}
-        <div className="border-t border-border/60 px-2 py-2">
-          <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 overflow-hidden whitespace-nowrap">
-            <div className="h-6 w-6 rounded-full bg-orange/10 flex items-center justify-center shrink-0">
-              <span className="text-[10px] font-bold text-orange">
+        {/* Footer: collapse toggle + user */}
+        <div className="border-t border-border/60 px-2 py-1.5 flex flex-col gap-1">
+          {/* Collapse toggle */}
+          <button
+            onClick={onToggle}
+            className="flex items-center gap-2.5 rounded-lg h-8 px-2.5 text-[13px] text-muted-foreground/60 hover:text-foreground hover:bg-muted/60 overflow-hidden whitespace-nowrap w-full"
+            style={{ transition: "background-color 150ms, color 150ms" }}
+            title={collapsed ? "Expand" : "Collapse"}
+          >
+            {collapsed ? (
+              <ChevronsRight className="h-4 w-4 shrink-0" />
+            ) : (
+              <ChevronsLeft className="h-4 w-4 shrink-0" />
+            )}
+            <span
+              className="text-xs"
+              style={{
+                opacity: collapsed ? 0 : 1,
+                transition: "opacity 200ms",
+              }}
+            >
+              Collapse
+            </span>
+          </button>
+
+          {/* User */}
+          <div className="flex items-center gap-2.5 rounded-lg h-8 px-2.5 overflow-hidden">
+            <div className="h-5 w-5 rounded-full bg-gradient-to-br from-orange to-orange-light flex items-center justify-center shrink-0">
+              <span className="text-[9px] font-bold text-white">
                 {(user?.displayName || "U").charAt(0).toUpperCase()}
               </span>
             </div>
-            <p className={cn(
-              "text-xs font-medium truncate transition-opacity duration-200",
-              collapsed ? "opacity-0" : "opacity-100"
-            )}>{user?.displayName || "User"}</p>
+            <span
+              className="text-xs font-medium truncate"
+              style={{
+                opacity: collapsed ? 0 : 1,
+                transition: "opacity 200ms",
+              }}
+            >
+              {user?.displayName || "User"}
+            </span>
           </div>
         </div>
       </div>
