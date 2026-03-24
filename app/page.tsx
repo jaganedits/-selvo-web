@@ -301,22 +301,19 @@ export default function HomePage() {
                   }}
                   className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row"
                 >
-                  <div className="rounded-[14px] border bg-foreground/10 p-0.5">
+                  <div className="rounded-2xl border bg-foreground/10 p-0.5">
                     <Link href="/login">
                       <Button
-                        size="lg"
-                        className="rounded-xl bg-orange hover:bg-orange-light px-5 text-base text-white"
+                        size="xl"
+                        className="bg-orange hover:bg-orange-light text-white active:scale-[0.98] transition-all"
                       >
                         Start Tracking
+                        <ArrowRight className="ml-1.5 h-4 w-4" />
                       </Button>
                     </Link>
                   </div>
                   <a href="#features">
-                    <Button
-                      size="lg"
-                      variant="ghost"
-                      className="rounded-xl px-5"
-                    >
+                    <Button size="xl" variant="ghost">
                       Learn More
                     </Button>
                   </a>
@@ -484,8 +481,8 @@ export default function HomePage() {
                 </p>
                 <Link href="/login">
                   <Button
-                    size="lg"
-                    className="rounded-xl bg-white text-orange hover:bg-white/90 h-12 px-8 text-base font-semibold transition-all active:scale-[0.98]"
+                    size="xl"
+                    className="bg-white text-orange hover:bg-white/90 transition-all active:scale-[0.98]"
                   >
                     Get Started Free
                     <ArrowRight className="ml-2 h-4 w-4" />
