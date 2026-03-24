@@ -15,12 +15,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (loading || (user && firebaseLoading)) return;
+    if (loading) return;
 
     const isPublicRoute = PUBLIC_ROUTES.some((route) =>
-      pathname.startsWith(route)
+      route === "/" ? pathname === "/" : pathname.startsWith(route)
     );
-
     const isAuthPage = pathname.startsWith("/login");
     const isOnboardingPage =
       pathname.startsWith("/welcome") || pathname.startsWith("/setup");
@@ -36,7 +35,6 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       !isOnboardingPage &&
       pathname !== "/"
     ) {
-      // User logged in but no Firebase config — send to onboarding
       router.replace("/welcome");
     }
   }, [user, loading, isConnected, firebaseLoading, pathname, router]);

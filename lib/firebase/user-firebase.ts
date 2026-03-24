@@ -41,7 +41,6 @@ class UserFirebaseManager {
     try {
       const userDoc = await getDoc(doc(mainFirestore, "users", uid));
       const data = userDoc.data();
-      console.log("[UserFirebaseManager] User doc fields:", data ? Object.keys(data) : "doc not found");
       if (data?.firebaseConfig) {
         const config = data.firebaseConfig as UserFirebaseConfig;
         this._initApp(config);

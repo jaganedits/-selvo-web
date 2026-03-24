@@ -37,30 +37,30 @@ const FirebaseContext = createContext<FirebaseContextType>({
 export function FirebaseProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [userFirestore, setUserFirestore] = useState<Firestore | null>(null);
   const [config, setConfig] = useState<UserFirebaseConfig | null>(null);
+  const [initialized, setInitialized] = useState(false);
+
+  // loading is true whenever user exists but we haven't finished checking their config
+  const loading = !!user && !initialized;
 
   useEffect(() => {
     if (!user) {
       setIsConnected(false);
-      setLoading(false);
+      setInitialized(false);
       setUserFirestore(null);
       setConfig(null);
       return;
     }
 
-    // Reset loading when user changes — critical to prevent premature redirect
-    setLoading(true);
+    setInitialized(false);
 
     const manager = UserFirebaseManager.instance;
 
     async function init() {
       try {
-        // Save profile on login
         await saveProfileOnLogin(user!);
 
-        // Try to load saved config
         const loaded = await manager.loadSavedConfig(user!.uid);
         if (loaded && manager.userFirestore) {
           setUserFirestore(manager.userFirestore);
@@ -78,7 +78,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         console.error("[FirebaseProvider] init error:", e);
       } finally {
-        setLoading(false);
+        setInitialized(true);
       }
     }
 
