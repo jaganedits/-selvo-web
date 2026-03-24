@@ -3,6 +3,7 @@
 import { useAuth } from "@/providers/auth-provider";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
+import Image from "next/image";
 
 const PUBLIC_ROUTES = ["/login", "/welcome", "/setup"];
 
@@ -29,10 +30,15 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div
-            className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange animate-pulse-glow"
-          >
-            <span className="font-heading text-2xl font-bold text-white">S</span>
+          <div className="h-14 w-14 rounded-2xl overflow-hidden animate-pulse-glow">
+            <Image
+              src="/assets/logo.png"
+              alt="Selvo"
+              width={56}
+              height={56}
+              className="h-full w-full object-cover"
+              priority
+            />
           </div>
           <p
             className="font-heading text-xl font-bold"
