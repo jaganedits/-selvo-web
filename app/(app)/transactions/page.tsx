@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Pagination, usePagination } from "@/components/shared/pagination";
 import {
   Sheet,
   SheetContent,
@@ -149,9 +150,11 @@ export default function TransactionsPage() {
     return list;
   }, [transactions, typeFilter, debouncedSearch]);
 
+  const { paginatedItems: paginatedTransactions, currentPage, totalPages, setCurrentPage, totalItems, pageSize } = usePagination(filtered, 20);
+
   const grouped = useMemo(() => {
     const map = new Map<string, Transaction[]>();
-    for (const tx of filtered) {
+    for (const tx of paginatedTransactions) {
       const d = toDate(tx.date);
       const key = format(d, "MMMM yyyy");
       const arr = map.get(key);
@@ -159,7 +162,7 @@ export default function TransactionsPage() {
       else map.set(key, [tx]);
     }
     return Array.from(map.entries());
-  }, [filtered]);
+  }, [paginatedTransactions]);
 
   // ---- Category lookup ----
   const catMap = useMemo(() => {
@@ -329,14 +332,14 @@ export default function TransactionsPage() {
             placeholder="Search transactions..."
             className="pl-7 h-8 text-[13px]"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(0); }}
           />
         </div>
         <div className="flex items-center gap-1 rounded-lg border border-input p-0.5">
           {(["all", "income", "expense"] as const).map((f) => (
             <button
               key={f}
-              onClick={() => setTypeFilter(f)}
+              onClick={() => { setTypeFilter(f); setCurrentPage(0); }}
               className={`px-3 py-1 rounded-md text-[13px] font-medium transition-colors ${
                 typeFilter === f
                   ? f === "income"
@@ -437,6 +440,13 @@ export default function TransactionsPage() {
               </div>
             </div>
           ))}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={totalItems}
+            pageSize={pageSize}
+          />
         </div>
       )}
 

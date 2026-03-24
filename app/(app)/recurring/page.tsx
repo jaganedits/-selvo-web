@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Pagination, usePagination } from "@/components/shared/pagination";
 import {
   Dialog,
   DialogContent,
@@ -101,6 +102,9 @@ export default function RecurringPage() {
     for (const c of categories) m.set(c.name, c);
     return m;
   }, [categories]);
+
+  // Pagination
+  const { paginatedItems: paginatedRecurring, currentPage, totalPages, setCurrentPage, totalItems, pageSize } = usePagination(recurring, 15);
 
   // Active categories for form
   const activeCats = formType === "expense" ? expenseCategories : incomeCategories;
@@ -282,7 +286,7 @@ export default function RecurringPage() {
 
           {/* Rows */}
           <div className="divide-y">
-            {recurring.map((r) => {
+            {paginatedRecurring.map((r) => {
               const cat = catMap.get(r.category);
               const Icon = cat ? getCategoryIcon(cat.iconCode) : CircleDot;
               const color = cat ? argbToHex(cat.colorValue) : "#95A5A6";
@@ -392,6 +396,15 @@ export default function RecurringPage() {
                 </div>
               );
             })}
+          </div>
+          <div className="px-4 pb-3">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalItems={totalItems}
+              pageSize={pageSize}
+            />
           </div>
         </div>
       )}

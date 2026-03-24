@@ -38,6 +38,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { Pagination, usePagination } from "@/components/shared/pagination";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -264,13 +265,20 @@ export default function SplitwisePage() {
     [parsedExpenses, importedIds]
   );
 
+  const { paginatedItems: paginatedExpenses, currentPage: expensePage, totalPages: expenseTotalPages, setCurrentPage: setExpensePage, totalItems: expenseTotalItems, pageSize: expensePageSize } = usePagination(parsedExpenses, 20);
+
+  const pageSelectableExpenses = useMemo(
+    () => paginatedExpenses.filter((e) => !importedIds.has(e.splitwiseId)),
+    [paginatedExpenses, importedIds]
+  );
+
   const toggleSelectAll = useCallback(() => {
-    if (selectedIds.size === selectableExpenses.length) {
+    if (pageSelectableExpenses.length > 0 && pageSelectableExpenses.every((e) => selectedIds.has(e.splitwiseId))) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(selectableExpenses.map((e) => e.splitwiseId)));
+      setSelectedIds(new Set(pageSelectableExpenses.map((e) => e.splitwiseId)));
     }
-  }, [selectedIds.size, selectableExpenses]);
+  }, [selectedIds, pageSelectableExpenses]);
 
   // ---------------------------------------------------------------------------
   // Import
@@ -501,21 +509,21 @@ export default function SplitwisePage() {
           ) : (
             <div className="rounded-xl border border-border bg-card overflow-hidden">
               {/* Select all */}
-              {selectableExpenses.length > 0 && (
+              {pageSelectableExpenses.length > 0 && (
                 <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-muted/30">
                   <Checkbox
-                    checked={selectedIds.size === selectableExpenses.length && selectableExpenses.length > 0}
+                    checked={pageSelectableExpenses.length > 0 && pageSelectableExpenses.every((e) => selectedIds.has(e.splitwiseId))}
                     onCheckedChange={toggleSelectAll}
                   />
                   <span className="text-[12px] text-muted-foreground">
-                    Select all ({selectableExpenses.length})
+                    Select all ({pageSelectableExpenses.length})
                   </span>
                 </div>
               )}
 
               {/* Expense list */}
               <div className="divide-y divide-border">
-                {parsedExpenses.map((expense) => {
+                {paginatedExpenses.map((expense) => {
                   const alreadyImported = importedIds.has(expense.splitwiseId);
                   return (
                     <div
@@ -554,6 +562,15 @@ export default function SplitwisePage() {
                     </div>
                   );
                 })}
+              </div>
+              <div className="px-4 pb-3">
+                <Pagination
+                  currentPage={expensePage}
+                  totalPages={expenseTotalPages}
+                  onPageChange={setExpensePage}
+                  totalItems={expenseTotalItems}
+                  pageSize={expensePageSize}
+                />
               </div>
             </div>
           )}
