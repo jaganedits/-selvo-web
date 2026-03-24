@@ -72,8 +72,8 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
             }
           } catch { /* non-critical */ }
         }
-      } catch {
-        // No config saved — user needs to set up
+      } catch (e) {
+        console.error("[FirebaseProvider] init error:", e);
       } finally {
         setLoading(false);
       }

@@ -47,7 +47,9 @@ class UserFirebaseManager {
         this._cacheConfig(config);
         return true;
       }
-    } catch { /* no config */ }
+    } catch (e) {
+      console.error("[UserFirebaseManager] Failed to load config from Firestore:", e);
+    }
     return false;
   }
 
