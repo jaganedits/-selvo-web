@@ -2,19 +2,35 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 import { useAuth } from "@/providers/auth-provider";
 import { signOut } from "@/lib/firebase/auth";
 import { cn } from "@/lib/utils";
 import {
-  Search, Bell, User, Settings, LogOut, ChevronDown,
+  Search, User, Settings, LogOut, ChevronDown,
+  Sun, Moon, LayoutDashboard, ArrowLeftRight, Wallet,
+  PieChart, Receipt, Tag, Repeat, Menu,
 } from "lucide-react";
+
+const PAGE_NAMES: Record<string, { label: string; icon: React.ElementType }> = {
+  "/dashboard": { label: "Dashboard", icon: LayoutDashboard },
+  "/transactions": { label: "Transactions", icon: ArrowLeftRight },
+  "/budget": { label: "Budget", icon: Wallet },
+  "/reports": { label: "Reports", icon: PieChart },
+  "/splitwise": { label: "Splitwise", icon: Receipt },
+  "/categories": { label: "Categories", icon: Tag },
+  "/recurring": { label: "Recurring", icon: Repeat },
+  "/settings": { label: "Settings", icon: Settings },
+};
 
 export function Header() {
   const { user } = useAuth();
+  const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -27,91 +43,133 @@ export function Header() {
     }
   }, [dropdownOpen]);
 
+  // Find current page
+  const currentPage = Object.entries(PAGE_NAMES).find(
+    ([path]) => pathname === path || (path !== "/dashboard" && pathname.startsWith(path))
+  );
+  const pageLabel = currentPage?.[1].label || "Dashboard";
+  const PageIcon = currentPage?.[1].icon || LayoutDashboard;
   const initials = (user?.displayName || "U").charAt(0).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-border/50 bg-background/80 backdrop-blur-md px-4 md:px-5 lg:px-6">
-      {/* Left: Search */}
-      <div className="flex items-center gap-3">
-        <button className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-          <Search className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Search...</span>
-          <kbd className="hidden lg:inline-flex h-4 items-center rounded border border-border/60 bg-background px-1 font-mono text-[10px] text-muted-foreground/60">
-            ⌘K
-          </kbd>
-        </button>
-      </div>
+    <header className="sticky top-0 z-30 border-b border-border/40 bg-background/60 backdrop-blur-xl">
+      <div className="flex h-11 items-center gap-3 px-4 md:px-5 lg:px-6">
+        {/* Left: Page context */}
+        <div className="flex items-center gap-2 min-w-0">
+          <PageIcon className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
+          <span className="text-[13px] font-medium truncate">{pageLabel}</span>
+        </div>
 
-      {/* Right: Notifications + Profile */}
-      <div className="flex items-center gap-1.5">
-        {/* Notifications */}
-        <button className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors relative">
-          <Bell className="h-4 w-4" />
-        </button>
-
-        {/* User dropdown */}
-        <div ref={dropdownRef} className="relative">
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className={cn(
-              "flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors",
-              dropdownOpen ? "bg-muted" : "hover:bg-muted"
-            )}
-          >
-            <div className="h-6 w-6 rounded-full bg-orange/10 flex items-center justify-center">
-              <span className="text-[10px] font-bold text-orange">{initials}</span>
+        {/* Center: Command palette trigger */}
+        <div className="flex-1 flex justify-center max-w-md mx-auto">
+          <button className="group flex items-center gap-2 w-full max-w-xs rounded-lg border border-border/50 bg-muted/30 px-3 py-1 text-xs text-muted-foreground/60 transition-all hover:border-border hover:bg-muted/50 hover:text-muted-foreground">
+            <Search className="h-3 w-3 shrink-0" />
+            <span className="flex-1 text-left">Search or jump to...</span>
+            <div className="flex items-center gap-0.5">
+              <kbd className="h-4 min-w-[18px] inline-flex items-center justify-center rounded border border-border/50 bg-background/80 px-1 font-mono text-[9px] text-muted-foreground/50">
+                ⌘
+              </kbd>
+              <kbd className="h-4 min-w-[18px] inline-flex items-center justify-center rounded border border-border/50 bg-background/80 px-1 font-mono text-[9px] text-muted-foreground/50">
+                K
+              </kbd>
             </div>
-            <span className="hidden sm:block text-xs font-medium max-w-[100px] truncate">
-              {user?.displayName || "User"}
-            </span>
-            <ChevronDown className={cn("h-3 w-3 text-muted-foreground transition-transform", dropdownOpen && "rotate-180")} />
+          </button>
+        </div>
+
+        {/* Right: Theme + User */}
+        <div className="flex items-center gap-1">
+          {/* Theme toggle */}
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-muted/60 transition-colors"
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            <Sun className="h-3.5 w-3.5 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-3.5 w-3.5 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
           </button>
 
-          {/* Dropdown menu */}
-          {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1.5 w-52 rounded-xl border border-border bg-card shadow-lg shadow-black/10 py-1 animate-fade-in">
-              {/* User info */}
-              <div className="px-3 py-2.5 border-b border-border/60">
-                <p className="text-xs font-medium truncate">{user?.displayName || "User"}</p>
-                <p className="text-[10px] text-muted-foreground truncate mt-0.5">{user?.email}</p>
+          {/* User dropdown */}
+          <div ref={dropdownRef} className="relative">
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className={cn(
+                "flex items-center gap-1.5 rounded-lg pl-1.5 pr-2 py-1 transition-colors",
+                dropdownOpen ? "bg-muted" : "hover:bg-muted/60"
+              )}
+            >
+              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-orange to-orange-light flex items-center justify-center">
+                <span className="text-[10px] font-bold text-white">{initials}</span>
               </div>
+              <ChevronDown className={cn(
+                "h-3 w-3 text-muted-foreground/50 transition-transform",
+                dropdownOpen && "rotate-180"
+              )} />
+            </button>
 
-              {/* Menu items */}
-              <div className="py-1">
-                <Link
-                  href="/settings"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                  <User className="h-3.5 w-3.5" />
-                  Profile
-                </Link>
-                <Link
-                  href="/settings"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                  <Settings className="h-3.5 w-3.5" />
-                  Settings
-                </Link>
-              </div>
+            {dropdownOpen && (
+              <div className="absolute right-0 top-full mt-1 w-56 rounded-xl border border-border/60 bg-card shadow-xl shadow-black/10 overflow-hidden animate-fade-in">
+                {/* User info */}
+                <div className="px-3 py-3 bg-muted/30">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange to-orange-light flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-white">{initials}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{user?.displayName || "User"}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
+                    </div>
+                  </div>
+                </div>
 
-              <div className="border-t border-border/60 py-1">
-                <button
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    signOut();
-                  }}
-                  className="flex items-center gap-2.5 px-3 py-2 text-xs text-destructive hover:bg-destructive/10 transition-colors w-full"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  Sign Out
-                </button>
+                <div className="py-1">
+                  <DropdownItem
+                    href="/settings"
+                    icon={User}
+                    label="Profile"
+                    onClick={() => setDropdownOpen(false)}
+                  />
+                  <DropdownItem
+                    href="/settings"
+                    icon={Settings}
+                    label="Settings"
+                    onClick={() => setDropdownOpen(false)}
+                  />
+                </div>
+
+                <div className="border-t border-border/40 py-1">
+                  <button
+                    onClick={() => { setDropdownOpen(false); signOut(); }}
+                    className="flex items-center gap-2.5 w-full px-3 py-2 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </header>
+  );
+}
+
+function DropdownItem({
+  href, icon: Icon, label, onClick,
+}: {
+  href: string;
+  icon: React.ElementType;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className="flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+    >
+      <Icon className="h-3.5 w-3.5" />
+      <span>{label}</span>
+    </Link>
   );
 }
