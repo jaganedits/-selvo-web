@@ -41,7 +41,12 @@ export function MobileNav() {
                   <item.icon className="h-5 w-5" />
                 </div>
               ) : (
-                <item.icon className="h-5 w-5" />
+                <div className={cn(
+                  "flex items-center justify-center h-7 w-7 rounded-lg transition-colors",
+                  isActive && "bg-orange/10"
+                )}>
+                  <item.icon className="h-5 w-5" />
+                </div>
               )}
               <span className={cn(item.isAction && "mt-0.5")}>{item.name}</span>
             </Link>

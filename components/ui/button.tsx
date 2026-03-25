@@ -22,6 +22,8 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         orange:
           "rounded-xl bg-orange text-white hover:bg-orange-light active:scale-[0.98] focus-visible:ring-orange/30",
+        income:
+          "rounded-xl border-income/40 text-income hover:bg-income/10 active:scale-[0.98] focus-visible:ring-income/30 dark:border-income/30 dark:hover:bg-income/15",
       },
       size: {
         default:

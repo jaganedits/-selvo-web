@@ -8,10 +8,15 @@ export interface UserFirebaseConfig {
   messagingSenderId: string;
 }
 
+export type UserRole = "admin" | "user";
+
 export interface UserProfile {
   name: string;
   email: string;
+  role?: UserRole;
+  disabled?: boolean;
   updatedAt?: Timestamp;
+  createdAt?: Timestamp;
   splitwiseApiKey?: string;
   firebaseConfig?: UserFirebaseConfig;
   configSetAt?: Timestamp;

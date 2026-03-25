@@ -10,6 +10,7 @@ import {
   type User,
 } from "firebase/auth";
 import { auth } from "./config";
+import { logLoginEvent } from "@/lib/services/login-history";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -19,6 +20,7 @@ export async function signInWithEmail(email: string, password: string) {
     await firebaseSignOut(auth);
     throw new Error("Please verify your email before signing in.");
   }
+  logLoginEvent(credential.user.uid, "email").catch(() => {});
   return credential.user;
 }
 
@@ -36,6 +38,7 @@ export async function registerWithEmail(
 
 export async function signInWithGoogle() {
   const result = await signInWithPopup(auth, googleProvider);
+  logLoginEvent(result.user.uid, "google").catch(() => {});
   return result.user;
 }
 

@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 
 const PUBLIC_ROUTES = ["/", "/login", "/welcome", "/setup"];
+const ADMIN_ROUTES_PREFIX = "/admin";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -23,6 +24,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const isAuthPage = pathname.startsWith("/login");
     const isOnboardingPage =
       pathname.startsWith("/welcome") || pathname.startsWith("/setup");
+    const isAdminRoute = pathname.startsWith(ADMIN_ROUTES_PREFIX);
 
     if (!user && !isPublicRoute) {
       router.replace("/login");
@@ -33,6 +35,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       !isConnected &&
       !firebaseLoading &&
       !isOnboardingPage &&
+      !isAdminRoute &&
       pathname !== "/"
     ) {
       router.replace("/welcome");

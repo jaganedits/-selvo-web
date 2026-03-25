@@ -1,77 +1,22 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { toast } from "sonner";
-import * as LucideIcons from "lucide-react";
-import {
-  Plus,
-  Loader2,
-  Trash2,
-  CircleDot,
-  Lock,
-} from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { useAuth } from "@/providers/auth-provider";
 import { useFirebase } from "@/providers/firebase-provider";
 import { useCategories } from "@/lib/hooks/use-categories";
 import { addCategory, deleteCategory } from "@/lib/services/firestore";
-import { MATERIAL_TO_LUCIDE } from "@/lib/constants/icon-map";
-import {
-  DEFAULT_EXPENSE_CATEGORIES,
-  DEFAULT_INCOME_CATEGORIES,
-} from "@/lib/constants/categories";
 import type { CategoryType } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function getCategoryIcon(iconCode: number) {
-  const name = MATERIAL_TO_LUCIDE[iconCode];
-  if (!name) return CircleDot;
-  const pascal = name
-    .split("-")
-    .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
-    .join("");
-  return (
-    (LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>>)[pascal] ||
-    CircleDot
-  );
-}
-
-function argbToHex(argb: number): string {
-  return `#${(argb & 0x00ffffff).toString(16).padStart(6, "0")}`;
-}
-
-const DEFAULT_EXPENSE_NAMES = new Set(
-  DEFAULT_EXPENSE_CATEGORIES.map((c) => c.name.toLowerCase().trim())
-);
-const DEFAULT_INCOME_NAMES = new Set(
-  DEFAULT_INCOME_CATEGORIES.map((c) => c.name.toLowerCase().trim())
-);
-
-function isDefaultCategory(name: string, type: CategoryType): boolean {
-  const norm = name.toLowerCase().trim();
-  return type === "expense"
-    ? DEFAULT_EXPENSE_NAMES.has(norm)
-    : DEFAULT_INCOME_NAMES.has(norm);
-}
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
+import { PageHeader } from "@/components/shared/page-header";
+import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { ConfirmationDialog } from "@/components/shared/confirmation-dialog";
+import { CategoryGrid } from "@/components/category/category-grid";
+import { AddCategoryDialog } from "@/components/category/add-category-dialog";
 
 export default function CategoriesPage() {
   const { user } = useAuth();
@@ -141,28 +86,19 @@ export default function CategoriesPage() {
     }
   }, [user, userFirestore, deletingCategory]);
 
-  const activeCats = activeTab === 0 ? expenseCategories : incomeCategories;
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-heading font-semibold">Categories</h1>
+    <div className="space-y-4 animate-stagger-in stagger-1">
+      <PageHeader title="Categories">
         <Button variant="orange" size="default" onClick={openAdd}>
           <Plus className="size-4" />
           Add Category
         </Button>
-      </div>
+      </PageHeader>
 
-      {/* Tabs */}
       <Tabs
         defaultValue={0}
         value={activeTab}
@@ -190,139 +126,26 @@ export default function CategoriesPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Add Dialog */}
-      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-base font-heading font-semibold">
-              Add {activeType === "expense" ? "Expense" : "Income"} Category
-            </DialogTitle>
-          </DialogHeader>
+      <AddCategoryDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        activeType={activeType}
+        name={formName}
+        onNameChange={setFormName}
+        onSubmit={handleAdd}
+        saving={saving}
+      />
 
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-[12px] text-muted-foreground">Name</Label>
-              <Input
-                placeholder="e.g. Subscriptions"
-                className="h-9 text-[13px]"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAdd();
-                }}
-              />
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              A default icon and color will be assigned. You can change them from the mobile app.
-            </p>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="orange" disabled={saving} onClick={handleAdd}>
-              {saving && <Loader2 className="size-4 animate-spin" />}
-              Add
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle className="text-base font-heading font-semibold">Delete Category</DialogTitle>
-          </DialogHeader>
-          <p className="text-[13px] text-muted-foreground">
-            Are you sure you want to delete &quot;{deletingCategory?.name}&quot;? Existing
-            transactions using this category will not be affected.
-          </p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" disabled={deleting} onClick={handleDelete}>
-              {deleting && <Loader2 className="size-4 animate-spin" />}
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Category Grid sub-component
-// ---------------------------------------------------------------------------
-
-function CategoryGrid({
-  categories,
-  type,
-  onDelete,
-}: {
-  categories: { id: string; name: string; iconCode: number; colorValue: number }[];
-  type: CategoryType;
-  onDelete: (cat: { id: string; name: string }) => void;
-}) {
-  if (categories.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-        <CircleDot className="size-8 mb-3 opacity-30" />
-        <p className="text-[13px]">No {type} categories</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 mt-3">
-      {categories.map((cat) => {
-        const Icon = getCategoryIcon(cat.iconCode);
-        const color = argbToHex(cat.colorValue);
-        const isDefault = isDefaultCategory(cat.name, type);
-
-        return (
-          <div
-            key={cat.id}
-            className="rounded-xl border border-border/60 bg-card p-3 flex flex-col items-center gap-2 relative group"
-          >
-            {/* Default badge */}
-            {isDefault && (
-              <div className="absolute top-1.5 right-1.5">
-                <Lock className="size-2.5 text-muted-foreground/50" />
-              </div>
-            )}
-
-            {/* Delete button for custom categories */}
-            {!isDefault && (
-              <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() => onDelete(cat)}
-                >
-                  <Trash2 className="size-3 text-red-500" />
-                </Button>
-              </div>
-            )}
-
-            {/* Icon */}
-            <div
-              className="size-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: `${color}20` }}
-            >
-              <Icon className="size-4" style={{ color }} />
-            </div>
-
-            {/* Name */}
-            <p className="text-[12px] font-medium text-center truncate w-full">
-              {cat.name}
-            </p>
-          </div>
-        );
-      })}
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Category"
+        message={`Are you sure you want to delete "${deletingCategory?.name}"? Existing transactions using this category will not be affected.`}
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        loading={deleting}
+        destructive
+      />
     </div>
   );
 }

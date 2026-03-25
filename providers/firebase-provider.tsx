@@ -70,13 +70,11 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
           // Process pending recurring transactions
           try {
             const count = await processPendingRecurring(manager.userFirestore!, user!.uid);
-            if (count > 0) {
-              console.log(`Processed ${count} pending recurring transactions`);
-            }
+            void count;
           } catch { /* non-critical */ }
         }
       } catch (e) {
-        console.error("[FirebaseProvider] init error:", e);
+        void e;
       } finally {
         setInitialized(true);
       }

@@ -21,6 +21,8 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { Testimonials } from "@/components/landing/testimonials-columns";
+import { AnimatedTextCycle } from "@/components/landing/animated-text-cycle";
 
 const FEATURES = [
   {
@@ -58,7 +60,7 @@ const FEATURES = [
 const NAV_ITEMS = [
   { name: "Features", href: "#features" },
   { name: "How it Works", href: "#how-it-works" },
-  { name: "Platforms", href: "#platforms" },
+  { name: "Testimonials", href: "#testimonials" },
 ];
 
 const transitionVariants = {
@@ -266,9 +268,13 @@ export default function HomePage() {
                     </div>
                   </Link>
 
-                  <h1 className="mx-auto mt-8 max-w-4xl text-balance font-heading text-5xl font-extrabold tracking-tight md:text-6xl lg:mt-16 lg:text-7xl xl:text-[5.25rem]">
+                  <h1 className="mx-auto mt-8 max-w-4xl font-heading text-5xl font-extrabold tracking-tight md:text-6xl lg:mt-16 lg:text-7xl xl:text-[5.25rem]">
                     Track your money.{" "}
-                    <span className="text-orange">Own your data.</span>
+                    <AnimatedTextCycle
+                      words={["Own your data.", "Set budgets.", "See insights.", "Stay private."]}
+                      interval={3000}
+                      className="text-orange"
+                    />
                   </h1>
 
                   <p className="mx-auto mt-8 max-w-2xl text-balance text-lg text-muted-foreground">
@@ -454,6 +460,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Testimonials */}
+        <Testimonials />
 
         {/* CTA */}
         <section className="py-24">

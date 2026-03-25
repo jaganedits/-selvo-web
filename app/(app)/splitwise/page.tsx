@@ -1,18 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import Image from "next/image";
 import { Timestamp } from "firebase/firestore";
 import { toast } from "sonner";
-import {
-  Loader2,
-  Unplug,
-  RefreshCw,
-  Download,
-  User,
-  Users,
-  Receipt,
-} from "lucide-react";
+import { Loader2, RefreshCw, Download, Receipt, Users } from "lucide-react";
 
 import { useAuth } from "@/providers/auth-provider";
 import { useFirebase } from "@/providers/firebase-provider";
@@ -31,14 +22,8 @@ import {
   type SplitwiseExpense,
   type SplitwiseFriend,
 } from "@/lib/services/splitwise";
-import { formatCurrency, formatDate } from "@/lib/utils/format";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { Pagination, usePagination } from "@/components/shared/pagination";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -48,6 +33,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { usePagination } from "@/components/shared/pagination";
+import { LoadingSpinner } from "@/components/shared/loading-spinner";
+
+import { ConnectForm } from "@/components/splitwise/connect-form";
+import { SplitwiseHeader } from "@/components/splitwise/splitwise-header";
+import { ExpenseTable } from "@/components/splitwise/expense-table";
+import { BalanceList } from "@/components/splitwise/balance-list";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -63,7 +55,7 @@ interface ParsedExpense {
 }
 
 // ---------------------------------------------------------------------------
-// Component
+// Page
 // ---------------------------------------------------------------------------
 
 export default function SplitwisePage() {
@@ -75,7 +67,11 @@ export default function SplitwisePage() {
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [connecting, setConnecting] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<{ first_name: string; last_name: string; id: number } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{
+    first_name: string;
+    last_name: string;
+    id: number;
+  } | null>(null);
 
   // Disconnect dialog
   const [disconnectOpen, setDisconnectOpen] = useState(false);
@@ -131,7 +127,9 @@ export default function SplitwisePage() {
     }
 
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   // ---------------------------------------------------------------------------
@@ -151,7 +149,7 @@ export default function SplitwisePage() {
       setSelectedIds(new Set());
     } catch (err) {
       toast.error("Failed to load Splitwise expenses");
-      console.error(err);
+      void err;
     } finally {
       setLoadingExpenses(false);
     }
@@ -165,7 +163,7 @@ export default function SplitwisePage() {
       setFriends(data);
     } catch (err) {
       toast.error("Failed to load Splitwise friends");
-      console.error(err);
+      void err;
     } finally {
       setLoadingFriends(false);
     }
@@ -248,24 +246,23 @@ export default function SplitwisePage() {
   // Selection
   // ---------------------------------------------------------------------------
 
-  const toggleSelect = useCallback(
-    (id: string) => {
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        return next;
-      });
-    },
-    []
-  );
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
-  const selectableExpenses = useMemo(
-    () => parsedExpenses.filter((e) => !importedIds.has(e.splitwiseId)),
-    [parsedExpenses, importedIds]
-  );
-
-  const { paginatedItems: paginatedExpenses, currentPage: expensePage, totalPages: expenseTotalPages, setCurrentPage: setExpensePage, totalItems: expenseTotalItems, pageSize: expensePageSize } = usePagination(parsedExpenses, 20);
+  const {
+    paginatedItems: paginatedExpenses,
+    currentPage: expensePage,
+    totalPages: expenseTotalPages,
+    setCurrentPage: setExpensePage,
+    totalItems: expenseTotalItems,
+    pageSize: expensePageSize,
+  } = usePagination(parsedExpenses, 20);
 
   const pageSelectableExpenses = useMemo(
     () => paginatedExpenses.filter((e) => !importedIds.has(e.splitwiseId)),
@@ -273,10 +270,15 @@ export default function SplitwisePage() {
   );
 
   const toggleSelectAll = useCallback(() => {
-    if (pageSelectableExpenses.length > 0 && pageSelectableExpenses.every((e) => selectedIds.has(e.splitwiseId))) {
+    if (
+      pageSelectableExpenses.length > 0 &&
+      pageSelectableExpenses.every((e) => selectedIds.has(e.splitwiseId))
+    ) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(pageSelectableExpenses.map((e) => e.splitwiseId)));
+      setSelectedIds(
+        new Set(pageSelectableExpenses.map((e) => e.splitwiseId))
+      );
     }
   }, [selectedIds, pageSelectableExpenses]);
 
@@ -313,7 +315,7 @@ export default function SplitwisePage() {
       setSelectedIds(new Set());
     } catch (err) {
       toast.error("Failed to import some expenses");
-      console.error(err);
+      void err;
     } finally {
       setImporting(false);
     }
@@ -324,11 +326,7 @@ export default function SplitwisePage() {
   // ---------------------------------------------------------------------------
 
   if (initialLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   // ---------------------------------------------------------------------------
@@ -337,69 +335,12 @@ export default function SplitwisePage() {
 
   if (!apiKey || !currentUser) {
     return (
-      <div className="space-y-4 max-w-2xl">
-        <h1 className="text-lg font-heading font-semibold">Splitwise</h1>
-
-        <div className="rounded-xl border border-border/60 bg-card p-6">
-          <div className="flex flex-col items-center text-center py-6">
-            <div className="size-12 rounded-xl bg-muted/60 flex items-center justify-center mb-3">
-              <Image
-                src="/assets/splitwise.svg"
-                alt="Splitwise"
-                width={24}
-                height={24}
-              />
-            </div>
-            <h2 className="text-base font-heading font-semibold mb-1">
-              Connect Splitwise
-            </h2>
-            <p className="text-[13px] text-muted-foreground max-w-sm">
-              Connect your Splitwise account to import shared expenses and keep
-              track of balances with friends.
-            </p>
-          </div>
-
-          <div className="space-y-3 mt-4">
-            <div className="space-y-1.5">
-              <Label className="text-[12px] text-muted-foreground">
-                API Key
-              </Label>
-              <Input
-                placeholder="Enter your Splitwise API key"
-                className="h-9 text-[13px]"
-                type="password"
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleConnect();
-                }}
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Get your API key from{" "}
-                <a
-                  href="https://secure.splitwise.com/apps"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-2 hover:text-foreground"
-                >
-                  secure.splitwise.com/apps
-                </a>
-              </p>
-            </div>
-
-            <Button
-              variant="orange"
-              size="lg"
-              className="w-full"
-              disabled={connecting}
-              onClick={handleConnect}
-            >
-              {connecting && <Loader2 className="size-4 animate-spin" />}
-              Connect
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ConnectForm
+        apiKeyInput={apiKeyInput}
+        onApiKeyInputChange={setApiKeyInput}
+        connecting={connecting}
+        onConnect={handleConnect}
+      />
     );
   }
 
@@ -408,28 +349,13 @@ export default function SplitwisePage() {
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg font-heading font-semibold">Splitwise</h1>
-          <Separator orientation="vertical" className="h-5" />
-          <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-            <User className="size-3.5" />
-            <span>{currentUser.first_name} {currentUser.last_name}</span>
-          </div>
-        </div>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => setDisconnectOpen(true)}
-        >
-          <Unplug className="size-3.5" />
-          Disconnect
-        </Button>
-      </div>
+    <div className="space-y-4 animate-stagger-in stagger-1">
+      <SplitwiseHeader
+        firstName={currentUser.first_name}
+        lastName={currentUser.last_name}
+        onDisconnectClick={() => setDisconnectOpen(true)}
+      />
 
-      {/* Tabs */}
       <Tabs
         defaultValue={0}
         value={activeTab}
@@ -491,168 +417,26 @@ export default function SplitwisePage() {
           )}
         </div>
 
-        {/* Expenses Tab */}
         <TabsContent value={0}>
-          {loadingExpenses ? (
-            <div className="flex items-center justify-center h-48">
-              <Loader2 className="size-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : parsedExpenses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <Receipt className="size-8 mb-3 opacity-30" />
-              <p className="text-[13px]">No expenses found</p>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
-              {/* Column headers */}
-              <div className="hidden sm:grid sm:grid-cols-[24px_1fr_100px_110px_100px] items-center gap-2 px-4 h-8 border-b border-border/30 bg-muted/20">
-                <span />
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">Name</span>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">Category</span>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 text-right">Date</span>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 text-right">Amount</span>
-              </div>
-
-              {/* Select all */}
-              {pageSelectableExpenses.length > 0 && (
-                <div className="flex items-center gap-2 px-4 h-8 border-b border-border/30 bg-muted/10">
-                  <Checkbox
-                    checked={pageSelectableExpenses.length > 0 && pageSelectableExpenses.every((e) => selectedIds.has(e.splitwiseId))}
-                    onCheckedChange={toggleSelectAll}
-                  />
-                  <span className="text-[11px] text-muted-foreground">
-                    Select all ({pageSelectableExpenses.length})
-                  </span>
-                </div>
-              )}
-
-              {/* Expense list */}
-              <div className="divide-y divide-border/30">
-                {paginatedExpenses.map((expense) => {
-                  const alreadyImported = importedIds.has(expense.splitwiseId);
-                  return (
-                    <div
-                      key={expense.splitwiseId}
-                      className={`px-4 h-10 transition-colors ${
-                        alreadyImported
-                          ? "opacity-50 bg-muted/20"
-                          : "hover:bg-muted/40"
-                      }`}
-                    >
-                      {/* Mobile layout */}
-                      <div className="flex items-center gap-2 h-full sm:hidden">
-                        <Checkbox
-                          checked={selectedIds.has(expense.splitwiseId)}
-                          onCheckedChange={() => toggleSelect(expense.splitwiseId)}
-                          disabled={alreadyImported}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-medium truncate">{expense.name}</p>
-                          <div className="flex items-center justify-between gap-2 mt-0.5">
-                            <span className="text-[11px] text-muted-foreground">{expense.category}</span>
-                            <span className="text-[11px] text-muted-foreground tabular-nums">{formatCurrency(expense.amount)}</span>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Desktop grid layout — matches header columns exactly */}
-                      <div className="hidden sm:grid sm:grid-cols-[24px_1fr_100px_110px_100px] items-center gap-2 h-full">
-                        <Checkbox
-                          checked={selectedIds.has(expense.splitwiseId)}
-                          onCheckedChange={() => toggleSelect(expense.splitwiseId)}
-                          disabled={alreadyImported}
-                        />
-                        <p className="text-[13px] font-medium truncate">{expense.name}</p>
-                        <span className="text-[12px] text-muted-foreground truncate">{expense.category}</span>
-                        <span className="text-[12px] text-muted-foreground text-right tabular-nums">
-                          {alreadyImported ? "Imported" : formatDate(expense.date)}
-                        </span>
-                        <span className="text-[13px] font-medium text-right tabular-nums text-expense">
-                          {formatCurrency(expense.amount)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="px-4 pb-3">
-                <Pagination
-                  currentPage={expensePage}
-                  totalPages={expenseTotalPages}
-                  onPageChange={setExpensePage}
-                  totalItems={expenseTotalItems}
-                  pageSize={expensePageSize}
-                />
-              </div>
-            </div>
-          )}
+          <ExpenseTable
+            loading={loadingExpenses}
+            parsedExpenses={parsedExpenses}
+            paginatedExpenses={paginatedExpenses}
+            importedIds={importedIds}
+            selectedIds={selectedIds}
+            pageSelectableExpenses={pageSelectableExpenses}
+            onToggleSelect={toggleSelect}
+            onToggleSelectAll={toggleSelectAll}
+            currentPage={expensePage}
+            totalPages={expenseTotalPages}
+            totalItems={expenseTotalItems}
+            pageSize={expensePageSize}
+            onPageChange={setExpensePage}
+          />
         </TabsContent>
 
-        {/* Balances Tab */}
         <TabsContent value={1}>
-          {loadingFriends ? (
-            <div className="flex items-center justify-center h-48">
-              <Loader2 className="size-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : friends.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <Users className="size-8 mb-3 opacity-30" />
-              <p className="text-[13px]">No friends found</p>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
-              <div className="divide-y divide-border/30">
-                {friends.map((friend) => {
-                  const balance = friend.balance?.[0];
-                  const amount = balance ? parseFloat(balance.amount) : 0;
-                  const isPositive = amount > 0;
-                  const isZero = amount === 0;
-
-                  return (
-                    <div
-                      key={friend.id}
-                      className="flex items-center gap-3 px-4 h-12"
-                    >
-                      <div className="size-8 rounded-full bg-muted/60 flex items-center justify-center shrink-0">
-                        <User className="size-4 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-medium truncate">
-                          {friend.first_name} {friend.last_name}
-                        </p>
-                        {friend.email && (
-                          <p className="text-[11px] text-muted-foreground truncate">
-                            {friend.email}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-right shrink-0">
-                        {isZero ? (
-                          <span className="text-[13px] text-muted-foreground">
-                            Settled
-                          </span>
-                        ) : (
-                          <>
-                            <p
-                              className={`text-[13px] tabular-nums font-medium ${
-                                isPositive
-                                  ? "text-emerald-600 dark:text-emerald-400"
-                                  : "text-red-600 dark:text-red-400"
-                              }`}
-                            >
-                              {formatCurrency(Math.abs(amount))}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {isPositive ? "owes you" : "you owe"}
-                            </p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          <BalanceList loading={loadingFriends} friends={friends} />
         </TabsContent>
       </Tabs>
 
@@ -660,7 +444,9 @@ export default function SplitwisePage() {
       <Dialog open={disconnectOpen} onOpenChange={setDisconnectOpen}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle className="text-base font-heading font-semibold">Disconnect Splitwise</DialogTitle>
+            <DialogTitle className="text-base font-heading font-semibold">
+              Disconnect Splitwise
+            </DialogTitle>
             <DialogDescription>
               This will remove your Splitwise API key. Previously imported
               transactions will not be affected.

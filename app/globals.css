@@ -62,23 +62,23 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: oklch(0.96 0.005 75);
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --card: oklch(0.997 0.001 75);
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
+  --popover: oklch(0.997 0.001 75);
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(0.955 0.004 75);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --muted: oklch(0.955 0.004 75);
+  --muted-foreground: oklch(0.50 0 0);
+  --accent: oklch(0.955 0.004 75);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --border: oklch(0.91 0.005 75);
+  --input: oklch(0.91 0.005 75);
   --ring: oklch(0.708 0 0);
   --chart-1: #CF4500;
   --chart-2: #323231;
@@ -94,16 +94,17 @@
   --selvo-budget: #3498DB;
   --selvo-charcoal: #323231;
   --selvo-charcoal-light: #4A4A49;
-  --selvo-surface: #F8F8F8;
-  --selvo-card-border: #EEEEEE;
-  --shadow-card: 0 4px 24px rgba(207,69,0,0.06);
-  --sidebar: oklch(0.985 0 0);
+  --selvo-surface: #F5F3F0;
+  --selvo-card-border: #E8E4DF;
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04), 0 8px 24px rgba(207,69,0,0.06);
+  --shadow-card-hover: 0 2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06), 0 12px 32px rgba(207,69,0,0.08);
+  --sidebar: oklch(0.98 0.002 75);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent: oklch(0.955 0.004 75);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-border: oklch(0.91 0.005 75);
   --sidebar-ring: oklch(0.708 0 0);
 }
 
@@ -142,6 +143,7 @@
   --selvo-surface: #1E1E1E;
   --selvo-card-border: #3A3A3A;
   --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+  --shadow-card-hover: 0 8px 32px rgba(0,0,0,0.45);
 }
 
 @layer base {
@@ -160,6 +162,12 @@
   }
 }
 
+/* Card elevation for light mode */
+:root .card-elevated,
+:root .rounded-xl[class*="border"][class*="bg-card"] {
+  box-shadow: var(--shadow-card);
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -169,11 +177,11 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.5 0 0 / 0.3);
+  background: oklch(0.55 0.02 60 / 0.3);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.5 0 0 / 0.5);
+  background: oklch(0.55 0.02 60 / 0.5);
 }
 .dark ::-webkit-scrollbar-thumb {
   background: oklch(0.7 0 0 / 0.2);
@@ -184,7 +192,7 @@
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: oklch(0.5 0 0 / 0.3) transparent;
+  scrollbar-color: oklch(0.55 0.02 60 / 0.3) transparent;
 }
 
 /* Selection color */
@@ -200,11 +208,16 @@
 }
 
 /* Smooth transitions for theme switch */
-html.transitioning,
-html.transitioning *,
-html.transitioning *::before,
-html.transitioning *::after {
-  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease !important;
+*,
+*::before,
+*::after {
+  transition: background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+/* Exclude elements that need instant color (inputs, selections, animations) */
+input, textarea, select,
+[class*="animate-"],
+.animate-spin {
+  transition: background-color 300ms ease, border-color 300ms ease;
 }
 
 .noise-overlay {
@@ -237,3 +250,15 @@ html.transitioning *::after {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
+
+/* Stagger entrance utilities */
+.animate-stagger-in {
+  animation: fade-up 0.45s ease-out forwards;
+  opacity: 0;
+}
+.stagger-1 { animation-delay: 0ms; }
+.stagger-2 { animation-delay: 75ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 225ms; }
+.stagger-5 { animation-delay: 300ms; }
+.stagger-6 { animation-delay: 375ms; }

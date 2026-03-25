@@ -48,7 +48,7 @@ class UserFirebaseManager {
         return true;
       }
     } catch (e) {
-      console.error("[UserFirebaseManager] Failed to load config from Firestore:", e);
+      void e;
     }
     return false;
   }

@@ -1,65 +1,35 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { Timestamp } from "firebase/firestore";
 import { toast } from "sonner";
-import * as LucideIcons from "lucide-react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  CircleDot,
-  Download,
-  Hash,
-  TrendingUp,
-  Calculator,
-} from "lucide-react";
+import { Download } from "lucide-react";
 import * as XLSX from "xlsx";
-import type { ValueType } from "recharts/types/component/DefaultTooltipContent";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
 
 import { useTransactions } from "@/lib/hooks/use-transactions";
 import { useCategories } from "@/lib/hooks/use-categories";
 import {
-  formatCurrency,
   formatDate,
   formatMonthYear,
   getMonthKey,
 } from "@/lib/utils/format";
-import { MATERIAL_TO_LUCIDE } from "@/lib/constants/icon-map";
+import { argbToHex } from "@/lib/utils/icon-helpers";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { MonthNavigation } from "@/components/shared/month-navigation";
+
+import { InsightCards } from "@/components/reports/insight-cards";
+
+const PieChartSection = dynamic(
+  () => import("@/components/reports/pie-chart-section").then((m) => ({ default: m.PieChartSection })),
+  { ssr: false, loading: () => <div className="rounded-xl border border-border/60 bg-card p-4 h-85 animate-pulse" /> }
+);
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function getCategoryIcon(iconCode: number) {
-  const name = MATERIAL_TO_LUCIDE[iconCode];
-  if (!name) return CircleDot;
-  const pascal = name
-    .split("-")
-    .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
-    .join("");
-  return (
-    (LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>>)[pascal] ||
-    CircleDot
-  );
-}
-
-function argbToHex(argb: number): string {
-  return `#${(argb & 0x00ffffff).toString(16).padStart(6, "0")}`;
-}
-
-// ---------------------------------------------------------------------------
-// Component
+// Page
 // ---------------------------------------------------------------------------
 
 export default function ReportsPage() {
@@ -124,6 +94,19 @@ export default function ReportsPage() {
     return { total, count, topCategory, avg };
   }, [monthTransactions, activeType, categoryBreakdown]);
 
+  // Pie chart data (maps categoryBreakdown → generic PieChartEntry shape)
+  const pieData = useMemo(
+    () =>
+      categoryBreakdown.map((item) => ({
+        name: item.name,
+        value: item.amount,
+        color: item.color,
+        iconCode: item.iconCode,
+        percentage: item.percentage,
+      })),
+    [categoryBreakdown]
+  );
+
   // Export helpers
   const exportToExcel = useCallback(() => {
     const filtered = monthTransactions.filter((t) => t.type === activeType);
@@ -170,40 +153,18 @@ export default function ReportsPage() {
   }, [monthTransactions, activeType, monthKey]);
 
   if (txLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-stagger-in stagger-1">
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-lg font-heading font-semibold">Reports</h1>
-        <div className="flex items-center gap-2">
-          {/* Month nav */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setMonthOffset((o) => o - 1)}
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-            <span className="text-[13px] font-medium w-32 text-center tabular-nums">
-              {formatMonthYear(currentDate)}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setMonthOffset((o) => o + 1)}
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-        </div>
+        <MonthNavigation
+          monthOffset={monthOffset}
+          onMonthChange={setMonthOffset}
+        />
       </div>
 
       {/* Tabs */}
@@ -231,18 +192,16 @@ export default function ReportsPage() {
 
         <TabsContent value={0}>
           <ReportContent
-            categoryBreakdown={categoryBreakdown}
+            pieData={pieData}
             insights={insights}
-            categories={categories}
             type="expense"
           />
         </TabsContent>
 
         <TabsContent value={1}>
           <ReportContent
-            categoryBreakdown={categoryBreakdown}
+            pieData={pieData}
             insights={insights}
-            categories={categories}
             type="income"
           />
         </TabsContent>
@@ -252,165 +211,29 @@ export default function ReportsPage() {
 }
 
 // ---------------------------------------------------------------------------
-// Report Content sub-component
+// Report Content — thin layout wrapper
 // ---------------------------------------------------------------------------
 
+import type { PieChartEntry } from "@/components/reports/pie-chart-section";
+import type { InsightData } from "@/components/reports/insight-cards";
+
 function ReportContent({
-  categoryBreakdown,
+  pieData,
   insights,
-  categories,
   type,
 }: {
-  categoryBreakdown: {
-    name: string;
-    amount: number;
-    percentage: number;
-    color: string;
-    iconCode: number;
-  }[];
-  insights: {
-    total: number;
-    count: number;
-    topCategory: string;
-    avg: number;
-  };
-  categories: { name: string; iconCode: number; colorValue: number }[];
+  pieData: PieChartEntry[];
+  insights: InsightData;
   type: "expense" | "income";
 }) {
   return (
     <div className="space-y-4 mt-3">
-      {/* Pie chart + legend */}
-      <div className="rounded-xl border border-border/60 bg-card p-4">
-        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-4">
-          {type === "expense" ? "Expense" : "Income"} Breakdown
-        </h2>
-        {categoryBreakdown.length > 0 ? (
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="w-55 h-55 shrink-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryBreakdown}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
-                    dataKey="amount"
-                    stroke="none"
-                  >
-                    {categoryBreakdown.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value?: ValueType) =>
-                      formatCurrency(Number(value ?? 0))
-                    }
-                    contentStyle={{
-                      borderRadius: "8px",
-                      border: "1px solid var(--border)",
-                      background: "var(--card)",
-                      fontSize: "12px",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            {/* Legend */}
-            <div className="flex-1 space-y-2 w-full">
-              {categoryBreakdown.map((cat) => {
-                const Icon = getCategoryIcon(cat.iconCode);
-                return (
-                  <div
-                    key={cat.name}
-                    className="flex items-center gap-2.5 text-sm"
-                  >
-                    <div
-                      className="size-7 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${cat.color}18` }}
-                    >
-                      <Icon className="size-3.5" style={{ color: cat.color }} />
-                    </div>
-                    <span className="truncate text-[13px] font-medium flex-1 min-w-0">
-                      {cat.name}
-                    </span>
-                    <span className="text-[12px] text-muted-foreground tabular-nums shrink-0">
-                      {cat.percentage}%
-                    </span>
-                    <span className="text-[13px] font-semibold tabular-nums shrink-0 w-24 text-right">
-                      {formatCurrency(cat.amount)}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-55 text-xs text-muted-foreground">
-            No {type} transactions this month
-          </div>
-
-        )}
-      </div>
-
-      {/* Insights row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-        <InsightCard
-          icon={<Calculator className="size-4" />}
-          label="Total Amount"
-          value={formatCurrency(insights.total)}
-          color={type === "expense" ? "text-red-500" : "text-emerald-500"}
-        />
-        <InsightCard
-          icon={<Hash className="size-4" />}
-          label="Transactions"
-          value={String(insights.count)}
-          color="text-foreground"
-        />
-        <InsightCard
-          icon={<TrendingUp className="size-4" />}
-          label="Top Category"
-          value={insights.topCategory}
-          color="text-foreground"
-        />
-        <InsightCard
-          icon={<Calculator className="size-4" />}
-          label="Avg / Transaction"
-          value={formatCurrency(insights.avg)}
-          color="text-muted-foreground"
-        />
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Insight Card sub-component
-// ---------------------------------------------------------------------------
-
-function InsightCard({
-  icon,
-  label,
-  value,
-  color,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  color: string;
-}) {
-  return (
-    <div className="rounded-xl border border-border/60 bg-card p-3">
-      <div className="flex items-center gap-1.5 mb-1.5 text-muted-foreground/60">
-        {icon}
-        <span className="text-[11px] font-semibold uppercase tracking-wider">
-          {label}
-        </span>
-      </div>
-      <p className={`text-base font-semibold font-heading tabular-nums truncate ${color}`}>
-        {value}
-      </p>
+      <PieChartSection
+        data={pieData}
+        title={`${type === "expense" ? "Expense" : "Income"} Breakdown`}
+        emptyMessage={`No ${type} transactions this month`}
+      />
+      <InsightCards insights={insights} type={type} />
     </div>
   );
 }

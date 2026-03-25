@@ -52,7 +52,7 @@ export function Header() {
   const initials = (user?.displayName || "U").charAt(0).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/40 bg-background/60 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
       <div className="flex h-11 items-center gap-3 px-4 md:px-5 lg:px-6">
         {/* Left: Page context */}
         <div className="flex items-center gap-2 min-w-0">
@@ -81,8 +81,7 @@ export function Header() {
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="relative h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-muted/60"
-            style={{ transition: "background-color 150ms, color 150ms" }}
+            className="relative h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-muted/60 overflow-hidden"
             title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           >
             <Sun
@@ -90,7 +89,7 @@ export function Header() {
               style={{
                 transform: theme === "dark" ? "rotate(-90deg) scale(0)" : "rotate(0deg) scale(1)",
                 opacity: theme === "dark" ? 0 : 1,
-                transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms",
+                transition: "transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 300ms ease",
               }}
             />
             <Moon
@@ -98,7 +97,7 @@ export function Header() {
               style={{
                 transform: theme === "dark" ? "rotate(0deg) scale(1)" : "rotate(90deg) scale(0)",
                 opacity: theme === "dark" ? 1 : 0,
-                transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms",
+                transition: "transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 300ms ease",
               }}
             />
           </button>

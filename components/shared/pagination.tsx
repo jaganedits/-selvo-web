@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -80,11 +80,18 @@ export function usePagination<T>(items: T[], pageSize: number = 20) {
   const [currentPage, setCurrentPage] = useState(0);
   const totalPages = Math.ceil(items.length / pageSize);
 
-  // Reset to first page when items change significantly
-  const safeCurrentPage = currentPage >= totalPages ? Math.max(0, totalPages - 1) : currentPage;
-  if (safeCurrentPage !== currentPage) setCurrentPage(safeCurrentPage);
+  // Reset page when items shrink below current page
+  useEffect(() => {
+    if (totalPages > 0 && currentPage >= totalPages) {
+      setCurrentPage(totalPages - 1);
+    }
+  }, [totalPages, currentPage]);
 
-  const paginatedItems = items.slice(safeCurrentPage * pageSize, (safeCurrentPage + 1) * pageSize);
+  const safeCurrentPage = currentPage >= totalPages ? Math.max(0, totalPages - 1) : currentPage;
+  const paginatedItems = useMemo(
+    () => items.slice(safeCurrentPage * pageSize, (safeCurrentPage + 1) * pageSize),
+    [items, safeCurrentPage, pageSize]
+  );
 
   return {
     paginatedItems,
