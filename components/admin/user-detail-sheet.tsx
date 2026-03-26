@@ -38,7 +38,7 @@ export function UserDetailSheet({ user, open, onOpenChange, onUserUpdated }: Use
 
   useEffect(() => {
     if (user && open) {
-      getLoginHistory(user.uid, 10).then(setLoginEvents).catch(() => {});
+      getLoginHistory(user.uid, 10).then(setLoginEvents).catch(console.error);
     }
   }, [user, open]);
 
@@ -107,7 +107,10 @@ export function UserDetailSheet({ user, open, onOpenChange, onUserUpdated }: Use
           <div className="flex-1 px-4 py-4 space-y-5">
             {/* Profile */}
             <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-full bg-linear-to-br from-orange to-orange-light flex items-center justify-center shrink-0 shadow-md shadow-orange/20">
+              {user.photoURL ? (
+                <img src={user.photoURL} alt="" className="h-14 w-14 rounded-full object-cover shrink-0 shadow-md shadow-orange/20" referrerPolicy="no-referrer" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden"); }} />
+              ) : null}
+              <div className={`h-14 w-14 rounded-full bg-linear-to-br from-orange to-orange-light flex items-center justify-center shrink-0 shadow-md shadow-orange/20 ${user.photoURL ? "hidden" : ""}`}>
                 <span className="text-xl font-bold text-white">
                   {(user.name || user.email || "U").charAt(0).toUpperCase()}
                 </span>

@@ -3,8 +3,9 @@
 import { useAuth } from "@/providers/auth-provider";
 import { useFirebase } from "@/providers/firebase-provider";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Preloader } from "@/components/shared/preloader";
+import { SelvoLogo } from "@/components/shared/selvo-logo";
 
 const PUBLIC_ROUTES = ["/", "/login", "/welcome", "/setup"];
 const ADMIN_ROUTES_PREFIX = "/admin";
@@ -14,6 +15,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isConnected, loading: firebaseLoading } = useFirebase();
   const router = useRouter();
   const pathname = usePathname();
+  const [showPreloader, setShowPreloader] = useState(() => {
+    if (typeof window === "undefined") return false;
+    // Set by login page on first-ever sign-in
+    const pending = sessionStorage.getItem("selvo_preloader_pending");
+    if (pending) {
+      sessionStorage.removeItem("selvo_preloader_pending");
+      return true;
+    }
+    return false;
+  });
 
   useEffect(() => {
     if (loading) return;
@@ -46,16 +57,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl overflow-hidden animate-pulse-glow">
-            <Image
-              src="/assets/logo.png"
-              alt="Selvo"
-              width={56}
-              height={56}
-              className="h-full w-full object-cover"
-              priority
-            />
-          </div>
+          <SelvoLogo className="h-14 w-14 text-orange" />
           <p
             className="font-heading text-xl font-bold"
             style={{ animation: "fade-in 0.4s ease-out forwards", animationDelay: "200ms", opacity: 0 }}
@@ -68,5 +70,17 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {showPreloader && (
+        <Preloader
+          onComplete={() => {
+            localStorage.setItem("selvo_preloader_shown", "true");
+            setShowPreloader(false);
+          }}
+        />
+      )}
+      {children}
+    </>
+  );
 }

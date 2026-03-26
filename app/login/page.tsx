@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { SelvoLogo } from "@/components/shared/selvo-logo";
 import {
   signInWithEmail,
   signInWithGoogle,
@@ -25,6 +26,7 @@ import {
   PieChart,
   AlertCircle,
 } from "lucide-react";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 interface FieldErrors {
   name?: string;
@@ -43,6 +45,7 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export default function LoginPage() {
+  usePageTitle("Sign In");
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [name, setName] = useState("");
@@ -92,6 +95,9 @@ export default function LoginPage() {
     try {
       if (mode === "signin") {
         await signInWithEmail(email.trim(), password);
+        if (!localStorage.getItem("selvo_preloader_shown")) {
+          sessionStorage.setItem("selvo_preloader_pending", "true");
+        }
         router.push("/");
       } else {
         await registerWithEmail(email.trim(), password, name.trim());
@@ -113,6 +119,9 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signInWithGoogle();
+      if (!localStorage.getItem("selvo_preloader_shown")) {
+        sessionStorage.setItem("selvo_preloader_pending", "true");
+      }
       router.push("/");
     } catch (error: unknown) {
       const message =
@@ -153,7 +162,7 @@ export default function LoginPage() {
     `pl-10 h-11 rounded-xl bg-muted/50 border focus-visible:ring-2 transition-colors ${
       hasError
         ? "border-destructive focus-visible:ring-destructive/30"
-        : "border-transparent focus-visible:ring-orange/30"
+        : "border-input focus-visible:ring-orange/30"
     }`;
 
   if (showForgotPassword) {
@@ -167,16 +176,7 @@ export default function LoginPage() {
               opacity: 0,
             }}
           >
-            <div className="h-14 w-14 rounded-2xl overflow-hidden animate-pulse-glow">
-              <Image
-                src="/assets/logo.png"
-                alt="Selvo"
-                width={56}
-                height={56}
-                className="h-full w-full object-cover"
-                priority
-              />
-            </div>
+            <SelvoLogo className="h-14 w-14 text-orange" />
           </div>
 
           <div
@@ -283,16 +283,7 @@ export default function LoginPage() {
       {/* Left Panel — Brand Hero (hidden below lg) */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#FF6B2C] via-[#CF4500] to-[#8B2E00] noise-overlay">
         <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-12">
-          <div className="h-24 w-24 rounded-3xl overflow-hidden shadow-2xl mb-6">
-            <Image
-              src="/assets/logo.png"
-              alt="Selvo"
-              width={96}
-              height={96}
-              className="h-full w-full object-cover"
-              priority
-            />
-          </div>
+          <SelvoLogo className="h-24 w-24 text-white mb-6 drop-shadow-2xl" />
           <h1 className="font-heading text-[56px] font-extrabold text-white tracking-tight leading-none">
             Selvo
           </h1>
@@ -331,16 +322,7 @@ export default function LoginPage() {
               opacity: 0,
             }}
           >
-            <div className="h-12 w-12 rounded-xl overflow-hidden animate-pulse-glow">
-              <Image
-                src="/assets/logo.png"
-                alt="Selvo"
-                width={48}
-                height={48}
-                className="h-full w-full object-cover"
-                priority
-              />
-            </div>
+            <SelvoLogo className="h-12 w-12 text-orange" />
           </div>
 
           {/* Title */}

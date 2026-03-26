@@ -20,7 +20,7 @@ export function RecentTransactions({ transactions, categories }: RecentTransacti
         <div className="space-y-1">
           {transactions.map((tx) => {
             const cat = categories.find((c) => c.name === tx.category);
-            const Icon = cat ? getCategoryIcon(cat.iconCode) : CircleDot;
+            const Icon = cat ? getCategoryIcon(cat.iconCode, cat.name) : CircleDot;
             const color = cat ? argbToHex(cat.colorValue) : "#95A5A6";
             const isIncome = tx.type === "income";
             return (

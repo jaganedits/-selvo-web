@@ -33,7 +33,7 @@ export function TopCategories({
       {topCategories.length > 0 ? (
         <div className="space-y-2.5">
           {topCategories.map((cat) => {
-            const Icon = getCategoryIcon(cat.iconCode);
+            const Icon = getCategoryIcon(cat.iconCode, cat.name);
             const pct = totalExpense > 0 ? Math.round((cat.amount / totalExpense) * 100) : 0;
             return (
               <div key={cat.name} className="flex items-center gap-2.5">

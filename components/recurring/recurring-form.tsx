@@ -106,7 +106,7 @@ export function RecurringForm({
             </Label>
             <div className="flex flex-wrap gap-1.5">
               {activeCats.map((c) => {
-                const CatIcon = getCategoryIcon(c.iconCode);
+                const CatIcon = getCategoryIcon(c.iconCode, c.name);
                 const catColor = argbToHex(c.colorValue);
                 const selected = values.category === c.name;
                 return (

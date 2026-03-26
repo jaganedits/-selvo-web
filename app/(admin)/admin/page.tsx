@@ -6,27 +6,41 @@ import { getAllUsers, type AdminUser } from "@/lib/services/admin";
 import { getRecentLoginsAllUsers, type LoginEvent } from "@/lib/services/login-history";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { formatDistanceToNow, format } from "date-fns";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 export default function AdminDashboardPage() {
+  usePageTitle("Admin Dashboard");
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [logins, setLogins] = useState<LoginEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getAllUsers(), getRecentLoginsAllUsers(15)])
-      .then(([u, l]) => {
+    async function load() {
+      try {
+        const u = await getAllUsers();
         setUsers(u);
-        // Enrich login events with user names
-        const userMap = new Map(u.map((usr) => [usr.uid, usr]));
-        setLogins(
-          l.map((ev) => ({
-            ...ev,
-            userName: userMap.get(ev.uid)?.name,
-            userEmail: userMap.get(ev.uid)?.email,
-          }))
-        );
-      })
-      .finally(() => setLoading(false));
+
+        try {
+          const uids = u.map((usr) => usr.uid);
+          const l = await getRecentLoginsAllUsers(uids, 3);
+          const userMap = new Map(u.map((usr) => [usr.uid, usr]));
+          setLogins(
+            l.slice(0, 15).map((ev) => ({
+              ...ev,
+              userName: userMap.get(ev.uid)?.name,
+              userEmail: userMap.get(ev.uid)?.email,
+            }))
+          );
+        } catch (e) {
+          console.error("Failed to load login history:", e);
+        }
+      } catch (e) {
+        console.error("Failed to load users:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
   const stats = useMemo(() => {
@@ -111,7 +125,10 @@ export default function AdminDashboardPage() {
                 key={u.uid}
                 className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-muted/40 transition-colors -mx-2"
               >
-                <div className="h-8 w-8 rounded-full bg-linear-to-br from-orange to-orange-light flex items-center justify-center shrink-0">
+                {u.photoURL ? (
+                  <img src={u.photoURL} alt="" className="h-8 w-8 rounded-full object-cover shrink-0" referrerPolicy="no-referrer" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden"); }} />
+                ) : null}
+                <div className={`h-8 w-8 rounded-full bg-linear-to-br from-orange to-orange-light flex items-center justify-center shrink-0 ${u.photoURL ? "hidden" : ""}`}>
                   <span className="text-[10px] font-bold text-white">
                     {(u.name || u.email || "U").charAt(0).toUpperCase()}
                   </span>

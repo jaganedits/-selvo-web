@@ -30,6 +30,7 @@ import {
   RecurringForm,
   type RecurringFormValues,
 } from "@/components/recurring/recurring-form";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -56,6 +57,7 @@ const DEFAULT_FORM: RecurringFormValues = {
 // ---------------------------------------------------------------------------
 
 export default function RecurringPage() {
+  usePageTitle("Recurring");
   const { user } = useAuth();
   const { userFirestore } = useFirebase();
   const { recurring, loading } = useRecurring();

@@ -2,8 +2,10 @@
 
 import { ExternalLink, CheckCircle, XCircle, Database, Shield, Bell, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 export default function AdminConfigPage() {
+  usePageTitle("System Config");
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "Not configured";
   const authDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "Not configured";
   const hasVapidKey = !!process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;

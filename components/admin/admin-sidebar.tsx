@@ -2,8 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { SelvoLogo } from "@/components/shared/selvo-logo";
 import {
   LayoutDashboard, Users, Bell, MessageSquare, Settings2, ArrowLeft, Shield,
 } from "lucide-react";
@@ -45,9 +45,7 @@ export function AdminSidebar() {
         {/* Logo + Admin badge */}
         <div className="flex items-center gap-2.5 h-12 px-4 shrink-0">
           <Link href="/admin" className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-md overflow-hidden shrink-0">
-              <Image src="/assets/logo.png" alt="Selvo" width={28} height={28} className="h-full w-full object-cover" />
-            </div>
+            <SelvoLogo className="h-7 w-7 text-orange" />
             <span className="font-heading text-base font-bold tracking-tight">Selvo</span>
           </Link>
           <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-orange/10 text-orange text-[10px] font-semibold uppercase tracking-wider">

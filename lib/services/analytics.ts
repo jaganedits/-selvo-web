@@ -8,7 +8,11 @@ async function getAnalyticsInstance(): Promise<Analytics | null> {
   if (typeof window === "undefined") return null;
   const supported = await isSupported();
   if (!supported) return null;
-  analytics = getAnalytics(app);
+  try {
+    analytics = getAnalytics(app);
+  } catch {
+    return null;
+  }
   return analytics;
 }
 

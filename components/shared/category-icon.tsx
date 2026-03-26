@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 interface CategoryIconProps {
   iconCode: number;
   colorValue: number;
+  name?: string;
   size?: "sm" | "md" | "lg";
 }
 
@@ -22,9 +23,10 @@ const iconSizeClasses = {
 export function CategoryIcon({
   iconCode,
   colorValue,
+  name,
   size = "md",
 }: CategoryIconProps) {
-  const Icon = getCategoryIcon(iconCode);
+  const Icon = getCategoryIcon(iconCode, name);
   const color = argbToHex(colorValue);
 
   return (

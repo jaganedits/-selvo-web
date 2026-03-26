@@ -73,7 +73,7 @@ export function PieChartSection({
           {/* Legend */}
           <div className="w-full space-y-1.5">
             {data.map((entry) => {
-              const Icon = getCategoryIcon(entry.iconCode ?? 0);
+              const Icon = getCategoryIcon(entry.iconCode ?? 0, entry.name);
               return (
                 <div
                   key={entry.name}

@@ -13,6 +13,7 @@ export type UserRole = "admin" | "user";
 export interface UserProfile {
   name: string;
   email: string;
+  photoURL?: string;
   role?: UserRole;
   disabled?: boolean;
   updatedAt?: Timestamp;

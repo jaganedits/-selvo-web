@@ -8,8 +8,10 @@ import { getNotificationHistory, type SentNotification } from "@/lib/services/no
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 export default function AdminMessagingPage() {
+  usePageTitle("Messaging");
   const [history, setHistory] = useState<SentNotification[]>([]);
   const [loading, setLoading] = useState(true);
 

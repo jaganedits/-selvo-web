@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/providers/auth-provider";
+import { SelvoLogo } from "@/components/shared/selvo-logo";
 import { useFirebase } from "@/providers/firebase-provider";
 import UserFirebaseManager from "@/lib/firebase/user-firebase";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import {
   ArrowRight, ArrowLeft, Shield, AlertCircle,
 } from "lucide-react";
 import type { UserFirebaseConfig } from "@/lib/types";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 const SECURITY_RULES = `rules_version = '2';
 service cloud.firestore {
@@ -32,6 +34,7 @@ service cloud.firestore {
 }`;
 
 export default function SetupPage() {
+  usePageTitle("Firebase Setup");
   const router = useRouter();
   const { user } = useAuth();
   const { connectWithConfig } = useFirebase();
@@ -158,9 +161,7 @@ export default function SetupPage() {
       <div className="w-full max-w-xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-center gap-3 mb-2">
-          <div className="h-10 w-10 rounded-xl overflow-hidden">
-            <Image src="/assets/logo.png" alt="Selvo" width={40} height={40} className="h-full w-full object-cover" />
-          </div>
+          <SelvoLogo className="h-10 w-10 text-orange" />
           <h1 className="font-heading text-2xl font-bold">Setup</h1>
         </div>
 

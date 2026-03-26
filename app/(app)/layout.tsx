@@ -25,14 +25,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarContext.Provider value={contextValue}>
-      <div className="min-h-screen bg-background">
+      <div className="h-screen bg-background overflow-hidden">
         <Sidebar collapsed={collapsed} onToggle={toggleSidebar} />
         <div className={cn(
-          "flex flex-col min-h-screen",
+          "flex flex-col h-screen",
           collapsed ? "md:ml-14" : "md:ml-60"
         )}>
           <Header />
-          <main className="flex-1 p-4 md:p-5 lg:p-6 pb-24 md:pb-6">
+          <main className="flex-1 min-h-0 p-4 md:p-5 lg:p-6 pb-24 md:pb-6 overflow-y-auto">
             {children}
           </main>
         </div>

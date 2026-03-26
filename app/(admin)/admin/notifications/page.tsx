@@ -16,8 +16,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 export default function AdminNotificationsPage() {
+  usePageTitle("Notifications");
   const { user } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [history, setHistory] = useState<SentNotification[]>([]);

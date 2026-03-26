@@ -6,7 +6,6 @@ import {
   orderBy,
   limit as firestoreLimit,
   serverTimestamp,
-  collectionGroup,
   Timestamp,
 } from "firebase/firestore";
 import { mainFirestore } from "@/lib/firebase/config";
@@ -61,29 +60,22 @@ export async function getLoginHistory(
 }
 
 export async function getRecentLoginsAllUsers(
-  count: number = 20
+  userIds: string[],
+  countPerUser: number = 5
 ): Promise<LoginEvent[]> {
-  // collectionGroup query across all users' login_history
-  const q = query(
-    collectionGroup(mainFirestore, "login_history"),
-    orderBy("timestamp", "desc"),
-    firestoreLimit(count)
+  // Fetch recent logins from each user individually (no collectionGroup needed)
+  const results = await Promise.allSettled(
+    userIds.map((uid) => getLoginHistory(uid, countPerUser))
   );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => {
-    const data = d.data();
-    // Extract uid from path: users/{uid}/login_history/{id}
-    const pathParts = d.ref.path.split("/");
-    const uid = pathParts[1] || "";
-    return {
-      id: d.id,
-      uid,
-      userName: data.userName,
-      userEmail: data.userEmail,
-      method: data.method || "email",
-      userAgent: data.userAgent || "",
-      platform: data.platform || "",
-      timestamp: data.timestamp instanceof Timestamp ? data.timestamp.toDate() : new Date(),
-    };
-  });
+
+  const all: LoginEvent[] = [];
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      all.push(...result.value);
+    }
+  }
+
+  // Sort by timestamp descending and return top entries
+  return all
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 }

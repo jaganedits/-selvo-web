@@ -89,6 +89,7 @@ export function CategoryGrid({ categories, type, onDelete }: CategoryGridProps) 
             <CategoryIcon
               iconCode={cat.iconCode}
               colorValue={cat.colorValue}
+              name={cat.name}
               size="md"
             />
 

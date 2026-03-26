@@ -51,6 +51,7 @@ export const BudgetCard = memo(function BudgetCard({
           <CategoryIcon
             iconCode={category.iconCode}
             colorValue={category.colorValue}
+            name={category.name}
             size="md"
           />
         ) : (

@@ -66,7 +66,7 @@ export function BudgetForm({
                 {(() => {
                   const cat = catMap.get(editingBudget.category);
                   if (!cat) return <span>{editingBudget.category}</span>;
-                  const EIcon = getCategoryIcon(cat.iconCode);
+                  const EIcon = getCategoryIcon(cat.iconCode, cat.name);
                   const eColor = argbToHex(cat.colorValue);
                   return (
                     <>
@@ -79,7 +79,7 @@ export function BudgetForm({
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {availableCategories.map((c) => {
-                  const CatIcon = getCategoryIcon(c.iconCode);
+                  const CatIcon = getCategoryIcon(c.iconCode, c.name);
                   const catColor = argbToHex(c.colorValue);
                   const selected = formCategory === c.name;
                   return (

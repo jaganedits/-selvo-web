@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { SelvoLogo } from "@/components/shared/selvo-logo";
 import { Wallet, Cloud, Star, ArrowRight, ArrowLeft } from "lucide-react";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 const steps = [
   {
@@ -28,6 +29,7 @@ const steps = [
 ];
 
 export default function WelcomePage() {
+  usePageTitle("Welcome");
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const step = steps[currentStep];
@@ -41,9 +43,7 @@ export default function WelcomePage() {
           className="flex justify-center mb-8"
           style={{ animation: "fade-up 0.5s ease-out forwards", opacity: 0 }}
         >
-          <div className="h-12 w-12 rounded-xl overflow-hidden">
-            <Image src="/assets/logo.png" alt="Selvo" width={48} height={48} className="h-full w-full object-cover" />
-          </div>
+          <SelvoLogo className="h-12 w-12 text-orange" />
         </div>
 
         {/* Step card */}

@@ -44,5 +44,6 @@ export async function saveProfileOnLogin(user: User): Promise<void> {
   await saveUserProfile(user.uid, {
     name: user.displayName || "",
     email: user.email || "",
+    ...(user.photoURL ? { photoURL: user.photoURL } : {}),
   });
 }

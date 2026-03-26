@@ -22,6 +22,7 @@ import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { MonthNavigation } from "@/components/shared/month-navigation";
 
 import { InsightCards } from "@/components/reports/insight-cards";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 const PieChartSection = dynamic(
   () => import("@/components/reports/pie-chart-section").then((m) => ({ default: m.PieChartSection })),
@@ -33,6 +34,7 @@ const PieChartSection = dynamic(
 // ---------------------------------------------------------------------------
 
 export default function ReportsPage() {
+  usePageTitle("Reports");
   const { transactions, loading: txLoading } = useTransactions();
   const { categories } = useCategories();
 

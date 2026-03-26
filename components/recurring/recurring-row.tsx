@@ -28,7 +28,7 @@ export const RecurringRow = memo(function RecurringRow({
   onEdit,
   onDelete,
 }: RecurringRowProps) {
-  const Icon = category ? getCategoryIcon(category.iconCode) : undefined;
+  const Icon = category ? getCategoryIcon(category.iconCode, category.name) : undefined;
   const color = category ? argbToHex(category.colorValue) : "#95A5A6";
   const isExpense = item.type === "expense";
   const nextDate =

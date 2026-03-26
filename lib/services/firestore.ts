@@ -138,20 +138,20 @@ export async function deleteRecurring(fs: Firestore, uid: string, docId: string)
 export async function saveSplitWiseApiKey(uid: string, apiKey: string) {
   await setDoc(doc(mainFirestore, "users", uid), { splitwiseApiKey: apiKey }, { merge: true });
   if (typeof window !== "undefined") {
-    localStorage.setItem("selvo_splitwise_token", apiKey);
+    sessionStorage.setItem("selvo_splitwise_token", apiKey);
   }
 }
 
 export async function getSplitWiseApiKey(uid: string): Promise<string | null> {
   if (typeof window !== "undefined") {
-    const cached = localStorage.getItem("selvo_splitwise_token");
+    const cached = sessionStorage.getItem("selvo_splitwise_token");
     if (cached) return cached;
   }
   try {
     const snap = await getDoc(doc(mainFirestore, "users", uid));
     const key = snap.data()?.splitwiseApiKey || null;
     if (key && typeof window !== "undefined") {
-      localStorage.setItem("selvo_splitwise_token", key);
+      sessionStorage.setItem("selvo_splitwise_token", key);
     }
     return key;
   } catch {
@@ -162,6 +162,6 @@ export async function getSplitWiseApiKey(uid: string): Promise<string | null> {
 export async function clearSplitWiseApiKey(uid: string) {
   await updateDoc(doc(mainFirestore, "users", uid), { splitwiseApiKey: "" });
   if (typeof window !== "undefined") {
-    localStorage.removeItem("selvo_splitwise_token");
+    sessionStorage.removeItem("selvo_splitwise_token");
   }
 }

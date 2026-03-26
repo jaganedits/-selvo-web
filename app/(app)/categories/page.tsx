@@ -17,8 +17,10 @@ import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { ConfirmationDialog } from "@/components/shared/confirmation-dialog";
 import { CategoryGrid } from "@/components/category/category-grid";
 import { AddCategoryDialog } from "@/components/category/add-category-dialog";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 export default function CategoriesPage() {
+  usePageTitle("Categories");
   const { user } = useAuth();
   const { userFirestore } = useFirebase();
   const { expenseCategories, incomeCategories, loading } = useCategories();
@@ -30,6 +32,8 @@ export default function CategoriesPage() {
   // Add dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [formName, setFormName] = useState("");
+  const [formIconCode, setFormIconCode] = useState(0xe5d3);
+  const [formColorValue, setFormColorValue] = useState(0xff95a5a6);
   const [saving, setSaving] = useState(false);
 
   // Delete dialog
@@ -39,6 +43,8 @@ export default function CategoriesPage() {
 
   const openAdd = useCallback(() => {
     setFormName("");
+    setFormIconCode(0xe5d3);
+    setFormColorValue(0xff95a5a6);
     setAddDialogOpen(true);
   }, []);
 
@@ -55,8 +61,8 @@ export default function CategoriesPage() {
       await addCategory(userFirestore, user.uid, {
         name: trimmed,
         type: activeType,
-        iconCode: 0xe5d3, // more-horizontal
-        colorValue: 0xff95a5a6, // gray
+        iconCode: formIconCode,
+        colorValue: formColorValue,
       });
       toast.success("Category added");
       setAddDialogOpen(false);
@@ -65,7 +71,7 @@ export default function CategoriesPage() {
     } finally {
       setSaving(false);
     }
-  }, [user, userFirestore, formName, activeType]);
+  }, [user, userFirestore, formName, activeType, formIconCode, formColorValue]);
 
   const openDelete = useCallback((cat: { id: string; name: string }) => {
     setDeletingCategory(cat);
@@ -132,6 +138,10 @@ export default function CategoriesPage() {
         activeType={activeType}
         name={formName}
         onNameChange={setFormName}
+        iconCode={formIconCode}
+        onIconCodeChange={setFormIconCode}
+        colorValue={formColorValue}
+        onColorValueChange={setFormColorValue}
         onSubmit={handleAdd}
         saving={saving}
       />

@@ -20,7 +20,7 @@ export async function signInWithEmail(email: string, password: string) {
     await firebaseSignOut(auth);
     throw new Error("Please verify your email before signing in.");
   }
-  logLoginEvent(credential.user.uid, "email").catch(() => {});
+  logLoginEvent(credential.user.uid, "email").catch(console.error);
   return credential.user;
 }
 
@@ -38,7 +38,7 @@ export async function registerWithEmail(
 
 export async function signInWithGoogle() {
   const result = await signInWithPopup(auth, googleProvider);
-  logLoginEvent(result.user.uid, "google").catch(() => {});
+  logLoginEvent(result.user.uid, "google").catch(console.error);
   return result.user;
 }
 
@@ -50,7 +50,7 @@ export async function signOut() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("selvo_user_profile");
     localStorage.removeItem("selvo_firebase_config");
-    localStorage.removeItem("selvo_splitwise_token");
+    sessionStorage.removeItem("selvo_splitwise_token");
   }
   await firebaseSignOut(auth);
 }

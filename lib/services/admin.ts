@@ -17,6 +17,7 @@ export interface AdminUser {
   uid: string;
   name: string;
   email: string;
+  photoURL?: string;
   role: UserRole;
   disabled: boolean;
   isConnected: boolean;
@@ -35,6 +36,7 @@ function mapUser(uid: string, data: UserProfile): AdminUser {
     uid,
     name: data.name || "",
     email: data.email || "",
+    photoURL: data.photoURL,
     role: data.role || "user",
     disabled: data.disabled || false,
     isConnected: !!data.firebaseConfig,

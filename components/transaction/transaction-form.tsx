@@ -134,7 +134,7 @@ export function TransactionForm({
             <Label className="text-[12px] text-muted-foreground">Category</Label>
             <div className="flex flex-wrap gap-1.5">
               {activeCats.map((c) => {
-                const CatIcon = getCategoryIcon(c.iconCode);
+                const CatIcon = getCategoryIcon(c.iconCode, c.name);
                 const catColor = argbToHex(c.colorValue);
                 const selected = formCategory === c.name;
                 return (

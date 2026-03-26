@@ -28,6 +28,7 @@ import { TransactionFilterBar } from "@/components/transaction/transaction-filte
 import type { TypeFilter } from "@/components/transaction/transaction-filter-bar";
 import { TransactionRow } from "@/components/transaction/transaction-row";
 import { TransactionForm } from "@/components/transaction/transaction-form";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -48,6 +49,7 @@ function dateToInputValue(d: Date): string {
 // ---------------------------------------------------------------------------
 
 export default function TransactionsPage() {
+  usePageTitle("Transactions");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -277,9 +279,9 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between animate-stagger-in stagger-1">
+      <div className="flex items-center justify-between animate-stagger-in stagger-1 shrink-0">
         <h1 className="text-lg font-heading font-semibold">Transactions</h1>
         <div className="flex items-center gap-2">
           <Button variant="orange" size="default" onClick={() => openAdd("expense")}>
@@ -298,53 +300,59 @@ export default function TransactionsPage() {
       </div>
 
       {/* Filter bar */}
-      <TransactionFilterBar
-        searchTerm={searchTerm}
-        onSearchChange={handleSearchChange}
-        typeFilter={typeFilter}
-        onTypeFilterChange={handleTypeFilterChange}
-        dateRange={dateRange}
-      />
+      <div className="shrink-0 mt-4">
+        <TransactionFilterBar
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+          typeFilter={typeFilter}
+          onTypeFilterChange={handleTypeFilterChange}
+          dateRange={dateRange}
+        />
+      </div>
 
-      {/* Transaction list */}
-      <div className="animate-stagger-in stagger-2">
+      {/* Transaction list — scrollable */}
+      <div className="animate-stagger-in stagger-2 mt-4 min-h-0 flex flex-col flex-1">
       {grouped.length === 0 ? (
         <EmptyState message="No transactions found" />
       ) : (
-        <div className="space-y-5">
-          {grouped.map(([month, txs]) => (
-            <div key={month}>
-              <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2">
-                {month}
-              </h2>
-              <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
-                {/* Column headers */}
-                <div className="hidden sm:flex items-center gap-3 px-3 h-8 border-b border-border/30 bg-muted/20">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 flex-1 min-w-0 pl-11">Name</span>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-24 text-right shrink-0">Date</span>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-10 text-center shrink-0 hidden md:block">Mode</span>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-28 text-right shrink-0">Amount</span>
-                  <span className="w-3.5 shrink-0" />
+        <>
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-5 custom-scrollbar">
+            {grouped.map(([month, txs]) => (
+              <div key={month}>
+                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2">
+                  {month}
+                </h2>
+                <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+                  {/* Column headers */}
+                  <div className="hidden sm:flex items-center gap-3 px-3 h-8 border-b border-border/30 bg-muted/20">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 flex-1 min-w-0 pl-11">Name</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-24 text-right shrink-0">Date</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-10 text-center shrink-0 hidden md:block">Mode</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-28 text-right shrink-0">Amount</span>
+                    <span className="w-3.5 shrink-0" />
+                  </div>
+                  {txs.map((tx) => (
+                    <TransactionRow
+                      key={tx.id}
+                      tx={tx}
+                      category={catMap.get(tx.category)}
+                      onClick={openEdit}
+                    />
+                  ))}
                 </div>
-                {txs.map((tx) => (
-                  <TransactionRow
-                    key={tx.id}
-                    tx={tx}
-                    category={catMap.get(tx.category)}
-                    onClick={openEdit}
-                  />
-                ))}
               </div>
-            </div>
-          ))}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            totalItems={totalItems}
-            pageSize={pageSize}
-          />
-        </div>
+            ))}
+          </div>
+          <div className="shrink-0 pt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalItems={totalItems}
+              pageSize={pageSize}
+            />
+          </div>
+        </>
       )}
       </div>
 

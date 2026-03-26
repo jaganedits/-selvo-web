@@ -22,8 +22,10 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmationDialog } from "@/components/shared/confirmation-dialog";
 import { BudgetCard } from "@/components/budget/budget-card";
 import { BudgetForm } from "@/components/budget/budget-form";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 export default function BudgetPage() {
+  usePageTitle("Budget");
   const { user } = useAuth();
   const { userFirestore } = useFirebase();
   const { transactions } = useTransactions();

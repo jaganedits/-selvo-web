@@ -28,7 +28,7 @@ export function CategoryBreakdown({ items, type }: CategoryBreakdownProps) {
   return (
     <div className="space-y-2">
       {items.map((item) => {
-        const Icon = getCategoryIcon(item.iconCode);
+        const Icon = getCategoryIcon(item.iconCode, item.name);
         return (
           <div key={item.name} className="flex items-center gap-2.5 text-sm">
             <div

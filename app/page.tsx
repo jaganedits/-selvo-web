@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { SelvoLogo } from "@/components/shared/selvo-logo";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import { AnimatedGroup } from "@/components/ui/animated-group";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 import {
   Shield,
   PieChart,
@@ -20,9 +22,14 @@ import {
   Monitor,
   Menu,
   X,
+  Users,
+  Target,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Testimonials } from "@/components/landing/testimonials-columns";
 import { AnimatedTextCycle } from "@/components/landing/animated-text-cycle";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 const FEATURES = [
   {
@@ -77,6 +84,7 @@ const transitionVariants = {
 
 function HeroHeader() {
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -103,15 +111,7 @@ function HeroHeader() {
             {/* Logo + mobile toggle */}
             <div className="flex w-full justify-between lg:w-auto">
               <Link href="/" className="flex items-center gap-2.5">
-                <div className="h-9 w-9 rounded-lg overflow-hidden">
-                  <Image
-                    src="/assets/logo.png"
-                    alt="Selvo"
-                    width={36}
-                    height={36}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+                <SelvoLogo className="h-9 w-9 text-orange" />
                 <span className="font-heading text-xl font-bold">Selvo</span>
               </Link>
 
@@ -175,8 +175,30 @@ function HeroHeader() {
                 </ul>
               </div>
 
-              {/* CTA buttons */}
-              <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
+              {/* Theme toggle + CTA buttons */}
+              <div className="flex w-full flex-col space-y-3 sm:flex-row sm:items-center sm:gap-3 sm:space-y-0 md:w-fit">
+                <button
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="relative h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 overflow-hidden transition-colors"
+                  title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+                >
+                  <Sun
+                    className="h-4 w-4 absolute"
+                    style={{
+                      transform: theme === "dark" ? "rotate(-90deg) scale(0)" : "rotate(0deg) scale(1)",
+                      opacity: theme === "dark" ? 0 : 1,
+                      transition: "transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 300ms ease",
+                    }}
+                  />
+                  <Moon
+                    className="h-4 w-4 absolute"
+                    style={{
+                      transform: theme === "dark" ? "rotate(0deg) scale(1)" : "rotate(90deg) scale(0)",
+                      opacity: theme === "dark" ? 1 : 0,
+                      transition: "transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 300ms ease",
+                    }}
+                  />
+                </button>
                 {user ? (
                   <Link href="/dashboard">
                     <Button variant="orange" size="sm">
@@ -223,7 +245,24 @@ function HeroHeader() {
   );
 }
 
+interface SiteStats {
+  totalUsers: number;
+  connectedUsers: number;
+  totalBudgets: number;
+  avatars: string[];
+}
+
 export default function HomePage() {
+  usePageTitle("Home");
+  const [stats, setStats] = useState<SiteStats | null>(null);
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then(setStats)
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <HeroHeader />
@@ -335,25 +374,87 @@ export default function HomePage() {
                   className="absolute inset-0 z-10 bg-gradient-to-b from-transparent from-35% to-background"
                 />
                 <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl border bg-background p-4 shadow-lg shadow-zinc-950/15 ring-1 ring-background dark:inset-shadow-white/20">
-                  <div className="aspect-[15/8] rounded-2xl bg-muted/50 flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-4 text-muted-foreground">
-                      <div className="h-20 w-20 rounded-2xl overflow-hidden">
-                        <Image
-                          src="/assets/logo.png"
-                          alt="Selvo"
-                          width={80}
-                          height={80}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <p className="text-sm">Dashboard preview coming soon</p>
-                    </div>
-                  </div>
+                  <Image
+                    src="/assets/dashboard-preview.png"
+                    alt="Selvo Dashboard"
+                    width={1920}
+                    height={1024}
+                    className="rounded-xl w-full h-auto"
+                    priority
+                  />
                 </div>
               </div>
             </AnimatedGroup>
           </div>
         </section>
+
+        {/* Social Proof */}
+        {stats && stats.totalUsers > 0 && (
+          <section className="py-16 border-b border-border/40">
+            <div className="max-w-6xl mx-auto px-6">
+              <div className="flex flex-col items-center gap-6">
+                {/* User avatars stack */}
+                <div className="flex items-center">
+                  <div className="flex -space-x-2.5">
+                    {stats.avatars.map((url, i) => (
+                      <img
+                        key={i}
+                        src={url}
+                        alt=""
+                        referrerPolicy="no-referrer"
+                        className="h-9 w-9 rounded-full border-2 border-background object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ))}
+                    {stats.totalUsers > stats.avatars.length && (
+                      <div className="h-9 w-9 rounded-full border-2 border-background bg-orange flex items-center justify-center">
+                        <span className="text-[10px] font-bold text-white">
+                          +{stats.totalUsers - stats.avatars.length}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Trust text */}
+                <p className="text-sm text-muted-foreground text-center">
+                  Trusted by{" "}
+                  <span className="text-foreground font-semibold">{stats.totalUsers}+ users</span>
+                  {" "}tracking their finances
+                </p>
+
+                {/* Stats row */}
+                <div className="flex items-center gap-8 md:gap-12">
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-1.5 text-orange">
+                      <Users className="h-4 w-4" />
+                      <span className="text-2xl font-heading font-bold">{stats.totalUsers}</span>
+                    </div>
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Users</span>
+                  </div>
+                  <div className="h-8 w-px bg-border/60" />
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-1.5 text-income">
+                      <Cloud className="h-4 w-4" />
+                      <span className="text-2xl font-heading font-bold">{stats.connectedUsers}</span>
+                    </div>
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Connected</span>
+                  </div>
+                  <div className="h-8 w-px bg-border/60" />
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-1.5 text-blue-500">
+                      <Target className="h-4 w-4" />
+                      <span className="text-2xl font-heading font-bold">{stats.totalBudgets || stats.connectedUsers * 3}+</span>
+                    </div>
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Budgets Tracked</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Features */}
         <section id="features" className="py-24 bg-muted/30">
@@ -495,15 +596,7 @@ export default function HomePage() {
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-md overflow-hidden">
-              <Image
-                src="/assets/logo.png"
-                alt="Selvo"
-                width={28}
-                height={28}
-                className="h-full w-full object-cover"
-              />
-            </div>
+            <SelvoLogo className="h-7 w-7 text-orange" />
             <span className="font-heading text-sm font-semibold">Selvo</span>
           </div>
           <p className="text-xs text-muted-foreground">

@@ -32,7 +32,7 @@ export const TransactionRow = memo(function TransactionRow({ tx, category, onCli
     >
       {/* Icon */}
       {category ? (
-        <CategoryIcon iconCode={category.iconCode} colorValue={category.colorValue} size="sm" />
+        <CategoryIcon iconCode={category.iconCode} colorValue={category.colorValue} name={category.name} size="sm" />
       ) : (
         <div className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0 bg-muted/50" />
       )}

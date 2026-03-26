@@ -10,6 +10,7 @@ import { saveUserProfile } from "@/lib/services/user-profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   Dialog,
   DialogContent,
@@ -59,9 +60,7 @@ export function ProfileSection() {
           Profile
         </h2>
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-full bg-gradient-to-br from-orange to-orange-light flex items-center justify-center shrink-0 shadow-md shadow-orange/20">
-            <span className="text-xl font-bold text-white">{initials}</span>
-          </div>
+          <UserAvatar size="lg" className="size-14 text-xl shadow-md shadow-orange/20" />
           <div className="flex-1 min-w-0">
             <p className="text-[15px] font-semibold truncate">
               {user?.displayName || "User"}

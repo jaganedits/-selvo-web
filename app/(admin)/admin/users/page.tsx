@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, memo } from "react";
-import { Search, Download, Shield } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback, memo, type SyntheticEvent } from "react";
+import { Search, Download, Shield, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { auth } from "@/lib/firebase/config";
 
 import { getAllUsers, type AdminUser } from "@/lib/services/admin";
 import { usePagination, Pagination } from "@/components/shared/pagination";
@@ -11,10 +12,12 @@ import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserDetailSheet } from "@/components/admin/user-detail-sheet";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 type Filter = "all" | "admin" | "connected" | "not-connected";
 
 export default function AdminUsersPage() {
+  usePageTitle("User Management");
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -79,6 +82,26 @@ export default function AdminUsersPage() {
     toast.success("CSV exported");
   }, [users]);
 
+  const [syncing, setSyncing] = useState(false);
+  const syncPhotos = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      const res = await fetch("/api/admin/sync-photos", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success(`Synced ${data.updated} profile photos`);
+      loadUsers();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Sync failed");
+    } finally {
+      setSyncing(false);
+    }
+  }, [loadUsers]);
+
   if (loading) return <LoadingSpinner />;
 
   return (
@@ -86,10 +109,16 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-heading font-semibold">Users</h1>
-        <Button variant="outline" size="sm" onClick={exportCSV}>
-          <Download className="size-3.5" />
-          Export CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={syncPhotos} disabled={syncing}>
+            <RefreshCw className={`size-3.5 ${syncing ? "animate-spin" : ""}`} />
+            Sync Photos
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportCSV}>
+            <Download className="size-3.5" />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       {/* Search + Filter */}
@@ -183,11 +212,7 @@ const UserRow = memo(function UserRow({
     >
       {/* Name */}
       <div className="flex items-center gap-2.5 min-w-0">
-        <div className="h-7 w-7 rounded-full bg-linear-to-br from-orange to-orange-light flex items-center justify-center shrink-0">
-          <span className="text-[9px] font-bold text-white">
-            {(user.name || user.email || "U").charAt(0).toUpperCase()}
-          </span>
-        </div>
+        <AdminAvatar photoURL={user.photoURL} name={user.name || user.email} size="sm" />
         <span className="text-[13px] font-medium truncate">{user.name || "Unnamed"}</span>
       </div>
 
@@ -228,3 +253,28 @@ const UserRow = memo(function UserRow({
     </button>
   );
 });
+
+function AdminAvatar({ photoURL, name, size = "sm" }: { photoURL?: string; name?: string; size?: "sm" | "md" }) {
+  const [imgError, setImgError] = useState(false);
+  const sizeClass = size === "md" ? "h-14 w-14" : "h-7 w-7";
+  const textClass = size === "md" ? "text-xl" : "text-[9px]";
+  const initial = (name || "U").charAt(0).toUpperCase();
+
+  if (photoURL && !imgError) {
+    return (
+      <img
+        src={photoURL}
+        alt=""
+        className={`${sizeClass} rounded-full object-cover shrink-0`}
+        referrerPolicy="no-referrer"
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className={`${sizeClass} rounded-full bg-linear-to-br from-orange to-orange-light flex items-center justify-center shrink-0`}>
+      <span className={`${textClass} font-bold text-white`}>{initial}</span>
+    </div>
+  );
+}

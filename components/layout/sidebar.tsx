@@ -2,13 +2,14 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "@/providers/auth-provider";
+import { SelvoLogo } from "@/components/shared/selvo-logo";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, ArrowLeftRight, Wallet, PieChart, Receipt,
   Tag, Repeat, Settings, Plus, ChevronsLeft, ChevronsRight,
 } from "lucide-react";
+import { UserAvatar } from "@/components/shared/user-avatar";
 
 const navGroups = [
   {
@@ -64,9 +65,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {/* Logo */}
         <div className="flex items-center justify-center h-12 shrink-0">
           <Link href="/dashboard">
-            <div className="h-7 w-7 rounded-md overflow-hidden">
-              <Image src="/assets/logo.png" alt="Selvo" width={28} height={28} className="h-full w-full object-cover" />
-            </div>
+            <SelvoLogo className="h-7 w-7 text-orange" />
           </Link>
         </div>
 
@@ -115,9 +114,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           >
             <ChevronsRight className="h-4 w-4" />
           </button>
-          <div className="h-6 w-6 rounded-full bg-linear-to-br from-orange to-orange-light flex items-center justify-center shadow-sm shadow-orange/20">
-            <span className="text-[9px] font-bold text-white">{initials}</span>
-          </div>
+          <UserAvatar size="sm" />
         </div>
       </aside>
     );
@@ -130,9 +127,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {/* Logo */}
         <div className="flex items-center gap-2.5 h-12 px-4 shrink-0">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-md overflow-hidden shrink-0">
-              <Image src="/assets/logo.png" alt="Selvo" width={28} height={28} className="h-full w-full object-cover" />
-            </div>
+            <SelvoLogo className="h-7 w-7 text-orange" />
             <span className="font-heading text-base font-bold tracking-tight">Selvo</span>
           </Link>
         </div>
@@ -200,9 +195,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </button>
 
           <div className="flex items-center gap-2.5 h-8 px-2.5">
-            <div className="h-6 w-6 rounded-full bg-linear-to-br from-orange to-orange-light flex items-center justify-center shrink-0 shadow-sm shadow-orange/20">
-              <span className="text-[9px] font-bold text-white">{initials}</span>
-            </div>
+            <UserAvatar size="sm" />
             <span className="text-xs font-medium truncate">{user?.displayName || "User"}</span>
           </div>
         </div>

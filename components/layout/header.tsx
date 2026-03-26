@@ -5,13 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/providers/auth-provider";
+import { useAdmin } from "@/lib/hooks/use-admin";
 import { signOut } from "@/lib/firebase/auth";
 import { cn } from "@/lib/utils";
 import {
-  Search, User, Settings, LogOut, ChevronDown,
+  Search, User, Settings, LogOut, ChevronDown, Shield,
   Sun, Moon, LayoutDashboard, ArrowLeftRight, Wallet,
   PieChart, Receipt, Tag, Repeat, Menu,
 } from "lucide-react";
+import { UserAvatar } from "@/components/shared/user-avatar";
 
 const PAGE_NAMES: Record<string, { label: string; icon: React.ElementType }> = {
   "/dashboard": { label: "Dashboard", icon: LayoutDashboard },
@@ -26,6 +28,7 @@ const PAGE_NAMES: Record<string, { label: string; icon: React.ElementType }> = {
 
 export function Header() {
   const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -49,8 +52,6 @@ export function Header() {
   );
   const pageLabel = currentPage?.[1].label || "Dashboard";
   const PageIcon = currentPage?.[1].icon || LayoutDashboard;
-  const initials = (user?.displayName || "U").charAt(0).toUpperCase();
-
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
       <div className="flex h-11 items-center gap-3 px-4 md:px-5 lg:px-6">
@@ -111,9 +112,7 @@ export function Header() {
                 dropdownOpen ? "bg-muted" : "hover:bg-muted/60"
               )}
             >
-              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-orange to-orange-light flex items-center justify-center">
-                <span className="text-[10px] font-bold text-white">{initials}</span>
-              </div>
+              <UserAvatar size="sm" />
               <ChevronDown className={cn(
                 "h-3 w-3 text-muted-foreground/50 transition-transform",
                 dropdownOpen && "rotate-180"
@@ -125,9 +124,7 @@ export function Header() {
                 {/* User info */}
                 <div className="px-3 py-3 bg-muted/30">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange to-orange-light flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-white">{initials}</span>
-                    </div>
+                    <UserAvatar />
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{user?.displayName || "User"}</p>
                       <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
@@ -149,6 +146,17 @@ export function Header() {
                     onClick={() => setDropdownOpen(false)}
                   />
                 </div>
+
+                {isAdmin && (
+                  <div className="border-t border-border/40 py-1">
+                    <DropdownItem
+                      href="/admin"
+                      icon={Shield}
+                      label="Admin Panel"
+                      onClick={() => setDropdownOpen(false)}
+                    />
+                  </div>
+                )}
 
                 <div className="border-t border-border/40 py-1">
                   <button

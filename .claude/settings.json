@@ -9,7 +9,13 @@
       "Bash(mkdir -p \"app/\\(app\\)/dashboard\")",
       "Bash(npm install:*)",
       "Bash(npx shadcn@latest init -d -y --base-color neutral --css-variables true)",
-      "Bash(npx shadcn@latest init --defaults)"
+      "Bash(npx shadcn@latest init --defaults)",
+      "Read(//c/Users/leite/Downloads/**)",
+      "WebFetch(domain:21st.dev)",
+      "Read(//c/Users/leite/Pictures/Screenshots/**)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\leite\\Pictures\\Screenshots"
     ]
   }
 }

@@ -13,6 +13,7 @@ import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { TopCategories } from "@/components/dashboard/top-categories";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import type { PieChartEntry } from "@/components/reports/pie-chart-section";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 const PieChartSection = dynamic(
   () => import("@/components/reports/pie-chart-section").then((m) => ({ default: m.PieChartSection })),
@@ -24,6 +25,7 @@ const BarChartSection = dynamic(
 );
 
 export default function DashboardPage() {
+  usePageTitle("Dashboard");
   const { user } = useAuth();
   const { transactions, loading: txLoading } = useTransactions();
   const { categories } = useCategories();

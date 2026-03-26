@@ -40,6 +40,7 @@ import { ConnectForm } from "@/components/splitwise/connect-form";
 import { SplitwiseHeader } from "@/components/splitwise/splitwise-header";
 import { ExpenseTable } from "@/components/splitwise/expense-table";
 import { BalanceList } from "@/components/splitwise/balance-list";
+import { usePageTitle } from "@/lib/hooks/use-page-title";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -59,6 +60,7 @@ interface ParsedExpense {
 // ---------------------------------------------------------------------------
 
 export default function SplitwisePage() {
+  usePageTitle("Splitwise");
   const { user } = useAuth();
   const { userFirestore } = useFirebase();
 
