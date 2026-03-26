@@ -282,31 +282,48 @@ export default function LoginPage() {
     <div className="relative min-h-screen flex flex-col lg:flex-row">
       {/* Left Panel — Brand Hero (hidden below lg) */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#FF6B2C] via-[#CF4500] to-[#8B2E00] noise-overlay">
-        <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-12">
-          <SelvoLogo className="h-24 w-24 text-white mb-6 drop-shadow-2xl" />
-          <h1 className="font-heading text-[56px] font-extrabold text-white tracking-tight leading-none">
+        {/* Person image */}
+        <div className="absolute inset-0 flex items-end justify-center z-10">
+          <Image
+            src="/assets/login-person.png"
+            alt="Person using Selvo app"
+            width={600}
+            height={750}
+            className="h-[80%] w-auto object-contain"
+            style={{
+              maskImage: "linear-gradient(to bottom, black 0%, black 75%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 75%, transparent 100%)",
+            }}
+            priority
+          />
+        </div>
+
+        {/* Brand content at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center pb-10 bg-gradient-to-t from-[#8B2E00] via-[#8B2E00]/80 to-transparent pt-28">
+          <SelvoLogo className="h-16 w-16 text-white mb-4 drop-shadow-2xl" />
+          <h2 className="font-heading text-4xl font-extrabold text-white tracking-tight">
             Selvo
-          </h1>
-          <p className="text-lg text-white/70 mt-3">
+          </h2>
+          <p className="text-base text-white/70 mt-2">
             Your finances, your cloud.
           </p>
         </div>
 
         {/* Floating decorative icons */}
         <Wallet
-          className="absolute top-[15%] left-[12%] text-white/20 w-12 h-12 animate-float"
+          className="absolute top-[15%] left-[12%] text-white/20 w-12 h-12 animate-float z-0"
           style={{ animationDelay: "0s" }}
         />
         <TrendingUp
-          className="absolute top-[35%] right-[10%] text-white/20 w-12 h-12 animate-float"
+          className="absolute top-[35%] right-[10%] text-white/20 w-12 h-12 animate-float z-0"
           style={{ animationDelay: "0.7s" }}
         />
         <PieChart
-          className="absolute bottom-[25%] left-[25%] text-white/20 w-12 h-12 animate-float"
+          className="absolute bottom-[30%] left-[20%] text-white/20 w-12 h-12 animate-float z-0"
           style={{ animationDelay: "1.4s" }}
         />
 
-        <span className="absolute bottom-8 left-8 text-sm text-white/40 z-10">
+        <span className="absolute bottom-3 left-6 text-sm text-white/40 z-20">
           Built with purpose
         </span>
       </div>

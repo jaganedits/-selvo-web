@@ -69,15 +69,21 @@ export default function SetupPage() {
         const client = json.client?.[0];
         const projectInfo = json.project_info;
         if (client && projectInfo) {
-          setConfig({
+          const newConfig = {
             apiKey: client.api_key?.[0]?.current_key || "",
             projectId: projectInfo.project_id || "",
             appId: client.client_info?.mobilesdk_app_id || "",
             storageBucket: projectInfo.storage_bucket || "",
             messagingSenderId: projectInfo.project_number || "",
-          });
-          toast.success("Config loaded from file");
-        } else {
+          };
+          // Validate that at least apiKey and projectId were extracted
+          if (!newConfig.apiKey || !newConfig.projectId) {
+            toast.error("Could not extract required fields from JSON");
+            return;
+          }
+          setConfig(newConfig);
+          toast.success("Config loaded from google-services.json");
+        } else if (json.apiKey || json.projectId) {
           // Try direct Firebase web config format
           setConfig({
             apiKey: json.apiKey || "",
@@ -87,6 +93,9 @@ export default function SetupPage() {
             messagingSenderId: json.messagingSenderId || "",
           });
           toast.success("Config loaded from file");
+        } else {
+          toast.error("Unrecognized JSON format. Use google-services.json or Firebase web config.");
+          return;
         }
         setTestResult(null);
       } catch {
@@ -94,6 +103,8 @@ export default function SetupPage() {
       }
     };
     reader.readAsText(file);
+    // Reset input so same file can be re-uploaded
+    e.target.value = "";
   }, []);
 
   const handleTestConnection = async () => {

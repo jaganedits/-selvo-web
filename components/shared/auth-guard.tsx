@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Preloader } from "@/components/shared/preloader";
 import { SelvoLogo } from "@/components/shared/selvo-logo";
 
-const PUBLIC_ROUTES = ["/", "/login", "/welcome", "/setup"];
+const PUBLIC_ROUTES = ["/", "/login", "/welcome", "/setup", "/guide", "/about"];
 const ADMIN_ROUTES_PREFIX = "/admin";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
