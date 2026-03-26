@@ -70,8 +70,8 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/assets/selvo-logo.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "48x48" },
-      { url: "/assets/logo.png", type: "image/png", sizes: "192x192" },
     ],
     apple: { url: "/assets/logo.png", sizes: "180x180" },
   },
